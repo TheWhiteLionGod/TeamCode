@@ -1,40 +1,41 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
+import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
+
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @TeleOp(name="Controller", group="FTC2025")
 public class Controller extends Robot {
     @Override
     public void configure() {
-        BL = hardwareMap.dcMotor.get("BL");
-        FL = hardwareMap.dcMotor.get("FL");
-        FR = hardwareMap.dcMotor.get("FR");
-        BR = hardwareMap.dcMotor.get("BR");
+        SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
+
+        BL = safeHardwareMap.getMotor("BL");
+        FL = safeHardwareMap.getMotor("FL");
+        FR = safeHardwareMap.getMotor("FR");
+        BR = safeHardwareMap.getMotor("BR");
 
         BL.setDirection(DcMotor.Direction.REVERSE);
         FL.setDirection(DcMotor.Direction.REVERSE);
 
-        launcher = hardwareMap.dcMotor.get("Launcher");
-        roller = hardwareMap.dcMotor.get("Roller");
+        launcher = safeHardwareMap.getMotor("Launcher");
+        roller = safeHardwareMap.getMotor("Roller");
 
-        carousel = hardwareMap.servo.get("Carousel");
-        lift = hardwareMap.servo.get("Lift");
-        colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+        carousel = safeHardwareMap.getServo("Carousel");
+        lift = safeHardwareMap.getServo("Lift");
+        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
 
-        aprilTag = new AprilTagProcessor.Builder().build();
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Camera"))
-                .addProcessor(aprilTag)
-                .build();
+        aprilTag = safeHardwareMap.getAprilTagProcessor();
+        visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
 
         drive = new SampleMecanumDrive(hardwareMap);
+        telemetry.update();
     }
 
     @Override
@@ -118,7 +119,8 @@ public class Controller extends Robot {
                 }
 
                 if (spinCarouselThread != null)
-                    spinCarouselThread.start();
+                    try { spinCarouselThread.start(); }
+                    catch (IllegalThreadStateException ignored) {}
             }
 
             sleep(50);

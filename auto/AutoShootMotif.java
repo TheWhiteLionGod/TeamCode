@@ -2,39 +2,38 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.FunctionThread;
+import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
 import org.firstinspires.ftc.teamcode.Positions;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.Trajectories;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Autonomous(name = "ShootMotifBlue", group = "FTC2025")
 public class AutoShootMotif extends Robot {
     @Override
     public void configure() {
-        launcher = hardwareMap.dcMotor.get("Launcher");
-        roller = hardwareMap.dcMotor.get("Roller");
+        SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
 
-        carousel = hardwareMap.servo.get("Carousel");
-        lift = hardwareMap.servo.get("Lift");
-        colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
+        launcher = safeHardwareMap.getMotor("Launcher");
+        roller = safeHardwareMap.getMotor("Roller");
 
-        aprilTag = new AprilTagProcessor.Builder().build();
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Camera"))
-                .addProcessor(aprilTag)
-                .build();
+        carousel = safeHardwareMap.getServo("Carousel");
+        lift = safeHardwareMap.getServo("Lift");
+        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
+
+        aprilTag = safeHardwareMap.getAprilTagProcessor();
+        visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
 
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
+        telemetry.update();
     }
 
     @Override

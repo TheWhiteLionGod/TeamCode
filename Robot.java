@@ -13,7 +13,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
+import org.firstinspires.ftc.teamcode.vision.VisionPortal;
+import org.firstinspires.ftc.teamcode.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
@@ -27,7 +29,7 @@ public abstract class Robot extends LinearOpMode {
     public DcMotor roller, launcher; // Intake Outtake Motors
     public Servo carousel, lift; // Carousel and Lift Servos
     public ColorSensor colorSensor; // Color Sensor
-    public AprilTagProcessor aprilTag;
+    public VisionProcessor aprilTag;
     public VisionPortal visionPortal;
     public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
@@ -168,6 +170,9 @@ public abstract class Robot extends LinearOpMode {
 
     // Reading April Tags
     public AprilTagDetection getAprilTag() {
+        if (aprilTag == null)
+            return null;
+
         List<AprilTagDetection> detections = aprilTag.getDetections();
         if (detections == null || detections.isEmpty())
             return null;
@@ -237,9 +242,9 @@ public abstract class Robot extends LinearOpMode {
     // Updating Color Sensor
     public void updateHSV() {
         Color.RGBToHSV(
-                (colorSensor.red() * Constants.HUE_SCALE_FACTOR),
-                (colorSensor.green() * Constants.HUE_SCALE_FACTOR),
-                (colorSensor.blue() * Constants.HUE_SCALE_FACTOR),
+                colorSensor.red(),
+                colorSensor.green(),
+                colorSensor.blue(),
                 hsvValues
         );
     }

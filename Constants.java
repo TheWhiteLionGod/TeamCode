@@ -20,7 +20,6 @@ public class Constants {
     public static final int GREEN_HUE_MAX = 180;
     public static final int PURPLE_HUE_MIN = 200;
     public static final int PURPLE_HUE_MAX = 240;
-    public static final int HUE_SCALE_FACTOR = 255;
 
     // Carousel Positions
     public static final double CAROUSEL_POS_1 = 0.0;

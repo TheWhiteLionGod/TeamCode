@@ -2,30 +2,24 @@ package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
+import org.firstinspires.ftc.teamcode.vision.VisionPortal;
+import org.firstinspires.ftc.teamcode.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
 @TeleOp(name = "Camera Test", group = "Test")
 public class TestCamera extends Robot {
-    AprilTagProcessor aprilTag;
+    VisionProcessor aprilTag;
     VisionPortal visionPortal;
 
     @Override
     public void configure() {
-        // Create the AprilTag processor.
-        aprilTag = new AprilTagProcessor.Builder()
-                .build();
-
-        // Create the vision portal by using a builder.
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "camera"))
-                .addProcessor(aprilTag)
-                .build();
+        SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
+        aprilTag = safeHardwareMap.getAprilTagProcessor();
+        visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
     }
 
     @Override

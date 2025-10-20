@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware;
 
 public class FunctionThread extends Thread {
     ThreadInterface execute;
@@ -19,11 +19,8 @@ public class FunctionThread extends Thread {
             // Stopping Thread if Interrupted
         }
         finally {
-            try {
-                cleanup.run();
-            } catch (InterruptedException ignored) {
-
-            }
+            try { cleanup.run(); }
+            catch (InterruptedException ignored) {}
         }
     }
 }
