@@ -47,8 +47,8 @@ public class SafeHardwareMap {
                 @Override public RunMode getMode() { return RunMode.RUN_WITHOUT_ENCODER; }
                 @Override public void setZeroPowerBehavior(ZeroPowerBehavior behavior) {}
                 @Override public ZeroPowerBehavior getZeroPowerBehavior() { return ZeroPowerBehavior.BRAKE; }
-                @Override public void setPowerFloat() {}
-                @Override public boolean getPowerFloat() { return false; }
+                public void setPowerFloat() {}
+                public boolean getPowerFloat() { return false; }
                 @Override public MotorConfigurationType getMotorType() { return null; }
                 @Override public void setMotorType(MotorConfigurationType motorType) {}
                 @Override public DcMotorController getController() { return null; }
@@ -101,10 +101,10 @@ public class SafeHardwareMap {
                 @Override public int green() { return 0; }
                 @Override public int blue() { return 0; }
                 @Override public int alpha() { return 0; }
-                @Override public int argb() { return 0; }
-                @Override public void enableLed(boolean enable) {}
-                @Override public void setI2cAddress(I2cAddr newAddress) {}
-                @Override public I2cAddr getI2cAddress() { return null; }
+                public int argb() { return 0; }
+                public void enableLed(boolean enable) {}
+                public void setI2cAddress(I2cAddr newAddress) {}
+                public I2cAddr getI2cAddress() { return null; }
             };
         }
     }
