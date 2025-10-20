@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.dynabytes;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.dynabytes.auto.*;
+import org.firstinspires.ftc.teamcode.auto.*;
 
 @TeleOp(name="Game", group="FTC2025")
 public class Game extends LinearOpMode {

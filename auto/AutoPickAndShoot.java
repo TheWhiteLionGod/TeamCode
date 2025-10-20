@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.dynabytes.auto;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.dynabytes.Robot;
-import org.firstinspires.ftc.dynabytes.Positions;
-import org.firstinspires.ftc.dynabytes.Trajectories;
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Positions;
+import org.firstinspires.ftc.teamcode.Trajectories;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 
 @Autonomous(name = "AutoPickAndShoot", group = "FTC2025")
