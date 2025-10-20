@@ -4,7 +4,9 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -32,6 +34,12 @@ public class SafeHardwareMap {
         catch (IllegalArgumentException e) {
             telemetry.addData("Failed to Get Motor", name);
             return new DcMotor() {
+                @Override public Manufacturer getManufacturer() { return null; }
+                @Override public String getDeviceName() { return ""; }
+                @Override public String getConnectionInfo() { return ""; }
+                @Override public int getVersion() { return 0; }
+                @Override public void resetDeviceConfigurationForOpMode() {}
+                @Override public void close() {}
                 private double power = 0;
                 @Override public void setPower(double p) { power = p; }
                 @Override public double getPower() { return power; }
@@ -39,7 +47,10 @@ public class SafeHardwareMap {
                 @Override public RunMode getMode() { return RunMode.RUN_WITHOUT_ENCODER; }
                 @Override public void setZeroPowerBehavior(ZeroPowerBehavior behavior) {}
                 @Override public ZeroPowerBehavior getZeroPowerBehavior() { return ZeroPowerBehavior.BRAKE; }
+                @Override public void setPowerFloat() {}
+                @Override public boolean getPowerFloat() { return false; }
                 @Override public MotorConfigurationType getMotorType() { return null; }
+                @Override public void setMotorType(MotorConfigurationType motorType) {}
                 @Override public DcMotorController getController() { return null; }
                 @Override public int getPortNumber() { return 0; }
                 @Override public void setDirection(Direction dir) {}
@@ -58,9 +69,17 @@ public class SafeHardwareMap {
             telemetry.addData("Failed to Get Motor", name);
             return new Servo() {
                 private double pos = 0;
+                @Override public Manufacturer getManufacturer() { return null; }
+                @Override public String getDeviceName() { return ""; }
+                @Override public String getConnectionInfo() { return ""; }
+                @Override public int getVersion() { return 0; }
+                @Override public void resetDeviceConfigurationForOpMode() {}
+                @Override public void close() {}
                 @Override public void setPosition(double p) { pos = p; }
                 @Override public double getPosition() { return pos; }
                 @Override public void scaleRange(double min, double max) {}
+                @Override public ServoController getController() { return null; }
+                @Override public int getPortNumber() { return 0; }
                 @Override public void setDirection(Direction dir) {}
                 @Override public Direction getDirection() { return Direction.FORWARD; }
             };
@@ -72,10 +91,20 @@ public class SafeHardwareMap {
         catch (Exception e) {
             telemetry.addData("Failed to Get Motor", name);
             return new ColorSensor() {
+                @Override public Manufacturer getManufacturer() { return null; }
+                @Override public String getDeviceName() { return ""; }
+                @Override public String getConnectionInfo() { return ""; }
+                @Override public int getVersion() { return 0; }
+                @Override public void resetDeviceConfigurationForOpMode() {}
+                @Override public void close() {}
                 @Override public int red() { return 0; }
                 @Override public int green() { return 0; }
                 @Override public int blue() { return 0; }
                 @Override public int alpha() { return 0; }
+                @Override public int argb() { return 0; }
+                @Override public void enableLed(boolean enable) {}
+                @Override public void setI2cAddress(I2cAddr newAddress) {}
+                @Override public I2cAddr getI2cAddress() { return null; }
             };
         }
     }
