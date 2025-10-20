@@ -5,6 +5,9 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 @TeleOp(name="Controller", group="FTC2025")
 public class Controller extends Robot {
@@ -25,11 +28,11 @@ public class Controller extends Robot {
         lift = hardwareMap.servo.get("Lift");
         colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
-//        aprilTag = new AprilTagProcessor.Builder().build();
-//        visionPortal = new VisionPortal.Builder()
-//                .setCamera(hardwareMap.get(WebcamName.class, "Camera"))
-//                .addProcessor(aprilTag)
-//                .build();
+        aprilTag = new AprilTagProcessor.Builder().build();
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Camera"))
+                .addProcessor(aprilTag)
+                .build();
 
         drive = new SampleMecanumDrive(hardwareMap);
     }
@@ -133,5 +136,7 @@ public class Controller extends Robot {
         if (runLauncherThread != null && runLauncherThread.isAlive()) {
             runLauncherThread.interrupt(); // Stopping Shooting Mechanism
         }
+
+        visionPortal.close();
     }
 }

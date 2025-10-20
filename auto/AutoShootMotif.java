@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.FunctionThread;
 import org.firstinspires.ftc.teamcode.Positions;
@@ -12,6 +13,8 @@ import org.firstinspires.ftc.teamcode.Trajectories;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 @Autonomous(name = "ShootMotifBlue", group = "FTC2025")
 public class AutoShootMotif extends Robot {
@@ -24,11 +27,11 @@ public class AutoShootMotif extends Robot {
         lift = hardwareMap.servo.get("Lift");
         colorSensor = hardwareMap.get(ColorSensor.class, "ColorSensor");
 
-//        aprilTag = new AprilTagProcessor.Builder().build();
-//        visionPortal = new VisionPortal.Builder()
-//                .setCamera(hardwareMap.get(WebcamName.class, "Camera"))
-//                .addProcessor(aprilTag)
-//                .build();
+        aprilTag = new AprilTagProcessor.Builder().build();
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Camera"))
+                .addProcessor(aprilTag)
+                .build();
 
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
@@ -52,6 +55,7 @@ public class AutoShootMotif extends Robot {
             motifBallTraj = Trajectories.trajectoryTo(Positions.BLUE_PPG.getPose2D(), drive);
             shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.PURPLE_BALL, Constants.GREEN_BALL};
         }
+        visionPortal.close();
 
         // Picking Up Motif Matching Ball
         forwardIntake();

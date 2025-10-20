@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -17,14 +18,14 @@ public class TestCamera extends Robot {
     @Override
     public void configure() {
         // Create the AprilTag processor.
-//        aprilTag = new AprilTagProcessor.Builder()
-//                .build();
-//
-//        // Create the vision portal by using a builder.
-//        visionPortal = new VisionPortal.Builder()
-//                .setCamera(hardwareMap.get(WebcamName.class, "camera"))
-//                .addProcessor(aprilTag)
-//                .build();
+        aprilTag = new AprilTagProcessor.Builder()
+                .build();
+
+        // Create the vision portal by using a builder.
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "camera"))
+                .addProcessor(aprilTag)
+                .build();
     }
 
     @Override
@@ -41,7 +42,6 @@ public class TestCamera extends Robot {
             telemetry.update();
         }
 
-//        visionPortal.close();
-
+        visionPortal.close();
     }
 }
