@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.path.EmptyPathSegmentException;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.hardware.*;
+import org.firstinspires.ftc.teamcode.hardware.color.ColorSensorHandler;
 import org.firstinspires.ftc.teamcode.hardware.motor.*;
 import org.firstinspires.ftc.teamcode.hardware.vision.*;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -25,14 +23,13 @@ public abstract class Robot extends LinearOpMode {
     public MotorHandler BL, FL, FR, BR; // Wheel Motors
     public MotorHandler roller, launcher; // Intake Outtake Motors
     public ServoHandler carousel, lift; // Carousel and Lift Servos
-    public ColorSensor colorSensor; // Color Sensor
+    public ColorSensorHandler colorSensor; // Color Sensor
     public VisionProcessor aprilTag;
     public VisionCamera visionPortal;
     public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
 
     double yawAngle; // Yaw Angle Data
-    float[] hsvValues = {0F, 0F, 0F}; // Color Sensing Data
 
     // Gear Mode Variables
     double gearSwitchTime = 0.0;
@@ -269,16 +266,6 @@ public abstract class Robot extends LinearOpMode {
         drive.setPoseEstimate(robotPos);
     }
 
-    // Updating Color Sensor
-    public void updateHSV() {
-        Color.RGBToHSV(
-                colorSensor.red(),
-                colorSensor.green(),
-                colorSensor.blue(),
-                hsvValues
-        );
-    }
-
     // Rotating Carousel to Next Position
     public void spinCarousel() {
         double cur_pos = carousel.getPosition();
@@ -300,23 +287,17 @@ public abstract class Robot extends LinearOpMode {
 
     // Spinning Carousel for Specific Ball Color
     public void findGreenBall() throws InterruptedException {
-        for (int i = 0; i < 3; i++) {
-            updateHSV();
-            if (hsvValues[0] >= Constants.GREEN_HUE_MIN
-                    && hsvValues[0] <= Constants.GREEN_HUE_MAX) {
-                return;
-            }
-
-            spinCarousel();
-            Thread.sleep(500);
-        }
+        findBall(Constants.GREEN_HUE_MIN, Constants.GREEN_HUE_MAX);
+    }
+    public void findPurpleBall() throws InterruptedException {
+        findBall(Constants.PURPLE_HUE_MIN, Constants.PURPLE_HUE_MAX);
     }
 
-    public void findPurpleBall() throws InterruptedException {
+    public void findBall(int min, int max) throws InterruptedException {
         for (int i = 0; i < 3; i++) {
-            updateHSV();
-            if (hsvValues[0] >= Constants.PURPLE_HUE_MIN
-                    && hsvValues[0] <= Constants.PURPLE_HUE_MAX) {
+            float[] hsvValues = colorSensor.hsv();
+            if (hsvValues[0] >= min
+                    && hsvValues[0] <= max) {
                 return;
             }
             spinCarousel();

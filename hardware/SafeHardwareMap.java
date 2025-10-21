@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+
 import org.firstinspires.ftc.teamcode.hardware.vision.*;
 import org.firstinspires.ftc.teamcode.hardware.motor.*;
+import org.firstinspires.ftc.teamcode.hardware.color.*;
 
 import java.lang.reflect.Method;
 
@@ -38,26 +38,11 @@ public class SafeHardwareMap {
         }
     }
 
-    public ColorSensor getColorSensor(String name) {
-        try { return hardwareMap.get(ColorSensor.class, name); }
-        catch (Exception e) {
+    public ColorSensorHandler getColorSensor(String name) {
+        try { return new HardwareColorSensor(hardwareMap.colorSensor.get(name)); }
+        catch (IllegalArgumentException e) {
             telemetry.addData("Failed to Get Motor", name);
-            return new ColorSensor() {
-                @Override public Manufacturer getManufacturer() { return null; }
-                @Override public String getDeviceName() { return ""; }
-                @Override public String getConnectionInfo() { return ""; }
-                @Override public int getVersion() { return 0; }
-                @Override public void resetDeviceConfigurationForOpMode() {}
-                @Override public void close() {}
-                @Override public int red() { return 0; }
-                @Override public int green() { return 0; }
-                @Override public int blue() { return 0; }
-                @Override public int alpha() { return 0; }
-                public int argb() { return 0; }
-                public void enableLed(boolean enable) {}
-                public void setI2cAddress(I2cAddr newAddress) {}
-                public I2cAddr getI2cAddress() { return null; }
-            };
+            return new MockColorSensor();
         }
     }
 
