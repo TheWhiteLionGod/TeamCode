@@ -29,8 +29,6 @@ public abstract class Robot extends LinearOpMode {
     public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
 
-    double yawAngle; // Yaw Angle Data
-
     // Gear Mode Variables
     double gearSwitchTime = 0.0;
     double curGearMode = Constants.MAX_GEAR;
@@ -88,7 +86,6 @@ public abstract class Robot extends LinearOpMode {
     public void updateOdometry() {
         drive.update(); // Update Roadrunner
         updatePoseFromAprilTags(); // Update April Tag
-        yawAngle = Math.toDegrees(drive.getPoseEstimate().getHeading()); // Update Yaw Angle
     }
 
     // Making Robot Follow Trajectory
@@ -144,7 +141,7 @@ public abstract class Robot extends LinearOpMode {
     // Field Drive Movement
     public void fieldDriveMove(double pwr_x, double pwr_y) {
         /* Adjust Joystick X/Y inputs by navX MXP yaw angle */
-        double yaw_radians = Math.toRadians(yawAngle);
+        double yaw_radians = drive.getPoseEstimate().getHeading();
         double temp = pwr_y * Math.cos(yaw_radians) + pwr_x * Math.sin(yaw_radians);
         pwr_x = -pwr_y * Math.sin(yaw_radians) + pwr_x * Math.cos(yaw_radians);
         pwr_y = temp;
@@ -248,7 +245,7 @@ public abstract class Robot extends LinearOpMode {
                 tagFieldPos.getY() + camTagPos.getX() * Math.sin(tagFieldPos.getHeading()) + camTagPos.getY() * Math.cos(tagFieldPos.getHeading()),
                 tagFieldPos.getHeading() + camTagPos.getHeading()
         );
-        
+
         // --- Step 3: Calculate the robot's field pose ---
         // Subtract the camera's offset to find the robot's center
         Pose2d camRobotPos = Positions.CAMERA.getPose2D();
@@ -301,13 +298,15 @@ public abstract class Robot extends LinearOpMode {
                 return;
             }
             spinCarousel();
-            Thread.sleep(500);
+            Thread.sleep(Constants.CAROUSEL_SPIN_TIME);
         }
     }
 
     public void startLauncher() throws InterruptedException {
         launcher.setPower(1);
-        Thread.sleep(1000);
+        while (launcher.getVelocity() < Constants.LAUNCHER_VELOCITY) {
+            Thread.sleep(100);
+        }
 
         lift.setPosition(Constants.LIFT_OUT_POS);
         Thread.sleep(1000);

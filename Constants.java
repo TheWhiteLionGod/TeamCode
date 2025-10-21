@@ -25,8 +25,12 @@ public class Constants {
     public static final double CAROUSEL_POS_1 = 0.0;
     public static final double CAROUSEL_POS_2 = 0.0;
     public static final double CAROUSEL_POS_3 = 0.0;
+    public static final int CAROUSEL_SPIN_TIME = 500;
 
     // Lift Positions
     public static final double LIFT_IN_POS = 0.0;
     public static final double LIFT_OUT_POS = 0.0;
+
+    // Launcher Velocity
+    public static final int LAUNCHER_VELOCITY = 1000;
 }

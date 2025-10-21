@@ -50,7 +50,10 @@ public class AutoShootMotif extends Robot {
             updateOdometry();
             if (spinCarouselThread == null || !spinCarouselThread.isAlive()) {
                 // Spin Carousel then Wait 500 Milliseconds Before Doing it Again
-                spinCarouselThread = new FunctionThread(this::spinCarousel, () -> Thread.sleep(500));
+                spinCarouselThread = new FunctionThread(
+                        this::spinCarousel,
+                        () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME)
+                );
                 spinCarouselThread.start();
             }
         }

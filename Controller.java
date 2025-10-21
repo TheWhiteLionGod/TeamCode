@@ -78,16 +78,20 @@ public class Controller extends Robot {
                     spinCarouselThread = new FunctionThread(this::findPurpleBall, () -> {});
                 }
                 else if (gamepad1.dpad_down) {
-                    spinCarouselThread = new FunctionThread(this::spinCarousel, () -> Thread.sleep(500));
+                    spinCarouselThread = new FunctionThread(this::spinCarousel,
+                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
                 }
                 else if (gamepad1.dpad_left) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_1), () -> Thread.sleep(500));
+                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_1),
+                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
                 }
                 else if (gamepad1.dpad_up) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_2), () -> Thread.sleep(500));
+                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_2),
+                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
                 }
                 else if (gamepad1.dpad_right) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_3), () -> Thread.sleep(500));
+                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_3),
+                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
                 }
 
                 if (spinCarouselThread != null)
