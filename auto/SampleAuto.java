@@ -13,7 +13,7 @@ import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 public class SampleAuto extends Robot {
     @Override
     public void configure() {
-        // Creating Drivetrain
+        super.configure();
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(Positions.START.getPose2D());
     }

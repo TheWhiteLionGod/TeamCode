@@ -14,10 +14,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
-import org.firstinspires.ftc.teamcode.vision.VisionPortal;
-import org.firstinspires.ftc.teamcode.vision.VisionProcessor;
+import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
+import org.firstinspires.ftc.teamcode.hardware.motor.Direction;
+import org.firstinspires.ftc.teamcode.hardware.motor.MotorHandler;
+import org.firstinspires.ftc.teamcode.hardware.motor.ZeroPowerBehavior;
+import org.firstinspires.ftc.teamcode.hardware.vision.VisionCamera;
+import org.firstinspires.ftc.teamcode.hardware.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
@@ -25,12 +28,12 @@ import java.util.List;
 @TeleOp(name = "Robot", group = "FTC2025")
 public abstract class Robot extends LinearOpMode {
     public SampleMecanumDrive drive; // Roadrunner Driver
-    public DcMotor BL, FL, FR, BR; // Wheel Motors
-    public DcMotor roller, launcher; // Intake Outtake Motors
+    public MotorHandler BL, FL, FR, BR; // Wheel Motors
+    public MotorHandler roller, launcher; // Intake Outtake Motors
     public Servo carousel, lift; // Carousel and Lift Servos
     public ColorSensor colorSensor; // Color Sensor
     public VisionProcessor aprilTag;
-    public VisionPortal visionPortal;
+    public VisionCamera visionPortal;
     public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
 
@@ -48,8 +51,41 @@ public abstract class Robot extends LinearOpMode {
         run();
     }
 
-    // "Configure" Runs Before Op Mode, "Run" Runs After.
-    abstract public void configure();
+    // "Configure" Runs Before Op Mode. Default Configuration Below
+    public void configure() {
+        SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
+
+        BL = safeHardwareMap.getMotor("BL");
+        FL = safeHardwareMap.getMotor("FL");
+        FR = safeHardwareMap.getMotor("FR");
+        BR = safeHardwareMap.getMotor("BR");
+
+        BL.setDirection(Direction.REVERSE);
+        FL.setDirection(Direction.REVERSE);
+
+        BL.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        FL.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        FR.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        BR.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+
+        launcher = safeHardwareMap.getMotor("Launcher");
+        roller = safeHardwareMap.getMotor("Roller");
+
+        launcher.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        roller.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+
+        carousel = safeHardwareMap.getServo("Carousel");
+        lift = safeHardwareMap.getServo("Lift");
+        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
+
+        aprilTag = safeHardwareMap.getAprilTagProcessor();
+        visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
+
+        drive = new SampleMecanumDrive(hardwareMap);
+        telemetry.update();
+    }
+
+    // All Robot Must Define their own Run Method
     abstract public void run();
 
     // Checks if OpModeIsActive

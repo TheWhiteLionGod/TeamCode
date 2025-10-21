@@ -1,43 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
 import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
-
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.teamcode.hardware.motor.Direction;
+import org.firstinspires.ftc.teamcode.hardware.motor.ZeroPowerBehavior;
 
 @TeleOp(name="Controller", group="FTC2025")
 public class Controller extends Robot {
-    @Override
-    public void configure() {
-        SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
-
-        BL = safeHardwareMap.getMotor("BL");
-        FL = safeHardwareMap.getMotor("FL");
-        FR = safeHardwareMap.getMotor("FR");
-        BR = safeHardwareMap.getMotor("BR");
-
-        BL.setDirection(DcMotor.Direction.REVERSE);
-        FL.setDirection(DcMotor.Direction.REVERSE);
-
-        launcher = safeHardwareMap.getMotor("Launcher");
-        roller = safeHardwareMap.getMotor("Roller");
-
-        carousel = safeHardwareMap.getServo("Carousel");
-        lift = safeHardwareMap.getServo("Lift");
-        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
-
-        aprilTag = safeHardwareMap.getAprilTagProcessor();
-        visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
-
-        drive = new SampleMecanumDrive(hardwareMap);
-        telemetry.update();
-    }
-
     @Override
     public void run() {
         while (canRun()) {

@@ -11,7 +11,7 @@ import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 public class AutoPickAndShoot extends Robot {
     @Override
     public void configure() {
-        // Creating Drivetrain
+        super.configure();
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
     }

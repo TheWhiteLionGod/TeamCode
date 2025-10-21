@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.vision;
+package org.firstinspires.ftc.teamcode.hardware.vision;
 
 import java.lang.reflect.Method;
 
-public class ReflectionVisionPortal implements VisionPortal {
+public class ReflectionVisionCamera implements VisionCamera {
     private final Object portal;
     private final Method close;
 
-    public ReflectionVisionPortal(Object portal) throws ReflectiveOperationException {
+    public ReflectionVisionCamera(Object portal) throws ReflectiveOperationException {
         this.portal = portal;
         this.close = portal.getClass().getMethod("close");
     }

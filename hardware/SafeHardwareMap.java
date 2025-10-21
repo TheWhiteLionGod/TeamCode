@@ -1,22 +1,16 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.vision.MockVisionPortal;
-import org.firstinspires.ftc.teamcode.vision.MockVisionProcessor;
-import org.firstinspires.ftc.teamcode.vision.ReflectionVisionPortal;
-import org.firstinspires.ftc.teamcode.vision.ReflectionVisionProcessor;
-import org.firstinspires.ftc.teamcode.vision.VisionPortal;
-import org.firstinspires.ftc.teamcode.vision.VisionProcessor;
+import org.firstinspires.ftc.teamcode.hardware.vision.*;
+import org.firstinspires.ftc.teamcode.hardware.motor.*;
 
 import java.lang.reflect.Method;
 
@@ -29,37 +23,11 @@ public class SafeHardwareMap {
         this.telemetry = telemetry;
     }
 
-    public DcMotor getMotor(String name) {
-        try { return hardwareMap.get(DcMotor.class, name); }
+    public MotorHandler getMotor(String name) {
+        try { return new HardwareMotor(hardwareMap.get(DcMotorEx.class, name)); }
         catch (IllegalArgumentException e) {
             telemetry.addData("Failed to Get Motor", name);
-            return new DcMotor() {
-                @Override public Manufacturer getManufacturer() { return null; }
-                @Override public String getDeviceName() { return ""; }
-                @Override public String getConnectionInfo() { return ""; }
-                @Override public int getVersion() { return 0; }
-                @Override public void resetDeviceConfigurationForOpMode() {}
-                @Override public void close() {}
-                private double power = 0;
-                @Override public void setPower(double p) { power = p; }
-                @Override public double getPower() { return power; }
-                @Override public void setMode(RunMode mode) {}
-                @Override public RunMode getMode() { return RunMode.RUN_WITHOUT_ENCODER; }
-                @Override public void setZeroPowerBehavior(ZeroPowerBehavior behavior) {}
-                @Override public ZeroPowerBehavior getZeroPowerBehavior() { return ZeroPowerBehavior.BRAKE; }
-                public void setPowerFloat() {}
-                public boolean getPowerFloat() { return false; }
-                @Override public MotorConfigurationType getMotorType() { return null; }
-                @Override public void setMotorType(MotorConfigurationType motorType) {}
-                @Override public DcMotorController getController() { return null; }
-                @Override public int getPortNumber() { return 0; }
-                @Override public void setDirection(Direction dir) {}
-                @Override public Direction getDirection() { return Direction.FORWARD; }
-                @Override public int getCurrentPosition() { return 0; }
-                @Override public void setTargetPosition(int pos) {}
-                @Override  public int getTargetPosition() { return 0; }
-                @Override public boolean isBusy() { return false; }
-            };
+            return new MockMotor();
         }
     }
 
@@ -129,10 +97,10 @@ public class SafeHardwareMap {
         }
     }
 
-    public VisionPortal getVisionPortal(VisionProcessor processor, String cameraName) {
+    public VisionCamera getVisionPortal(VisionProcessor processor, String cameraName) {
         try {
             // If Vision Processor is Mock, Vision Portal Should Be Mock
-            if (processor instanceof MockVisionProcessor) { return new MockVisionPortal(); }
+            if (processor instanceof MockVisionProcessor) { return new MockVisionCamera(); }
 
             // Getting Classes
             Class<?> portalBuilderClass = Class.forName("org.firstinspires.ftc.vision.VisionPortal$Builder");
@@ -157,10 +125,10 @@ public class SafeHardwareMap {
             Method build = portalBuilderClass.getMethod("build");
             Object portal = build.invoke(portalBuilder);
 
-            return new ReflectionVisionPortal(portal);
+            return new ReflectionVisionCamera(portal);
         }
         catch (Exception e) {
-            return new MockVisionPortal();
+            return new MockVisionCamera();
         }
     }
 }

@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode.vision;
+package org.firstinspires.ftc.teamcode.hardware.vision;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Collections;
 

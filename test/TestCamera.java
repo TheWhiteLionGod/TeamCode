@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
-import org.firstinspires.ftc.teamcode.vision.VisionPortal;
-import org.firstinspires.ftc.teamcode.vision.VisionProcessor;
+import org.firstinspires.ftc.teamcode.hardware.vision.VisionCamera;
+import org.firstinspires.ftc.teamcode.hardware.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 @TeleOp(name = "Camera Test", group = "Test")
 public class TestCamera extends Robot {
     VisionProcessor aprilTag;
-    VisionPortal visionPortal;
+    VisionCamera visionPortal;
 
     @Override
     public void configure() {

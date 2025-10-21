@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.vision;
+package org.firstinspires.ftc.teamcode.hardware.vision;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 

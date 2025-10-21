@@ -12,28 +12,14 @@ import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Autonomous(name = "ShootMotifBlue", group = "FTC2025")
 public class AutoShootMotif extends Robot {
     @Override
     public void configure() {
-        SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
-
-        launcher = safeHardwareMap.getMotor("Launcher");
-        roller = safeHardwareMap.getMotor("Roller");
-
-        carousel = safeHardwareMap.getServo("Carousel");
-        lift = safeHardwareMap.getServo("Lift");
-        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
-
-        aprilTag = safeHardwareMap.getAprilTagProcessor();
-        visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
-
+        super.configure();
         drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
-        telemetry.update();
+        drive.setPoseEstimate(Positions.BLUE_UP.getPose2D());
     }
 
     @Override
