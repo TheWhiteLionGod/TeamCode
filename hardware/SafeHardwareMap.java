@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -31,26 +30,11 @@ public class SafeHardwareMap {
         }
     }
 
-    public Servo getServo(String name) {
-        try { return hardwareMap.get(Servo.class, name); }
+    public ServoHandler getServo(String name) {
+        try { return new HardwareServo(hardwareMap.get(Servo.class, name)); }
         catch (IllegalArgumentException e) {
             telemetry.addData("Failed to Get Motor", name);
-            return new Servo() {
-                private double pos = 0;
-                @Override public Manufacturer getManufacturer() { return null; }
-                @Override public String getDeviceName() { return ""; }
-                @Override public String getConnectionInfo() { return ""; }
-                @Override public int getVersion() { return 0; }
-                @Override public void resetDeviceConfigurationForOpMode() {}
-                @Override public void close() {}
-                @Override public void setPosition(double p) { pos = p; }
-                @Override public double getPosition() { return pos; }
-                @Override public void scaleRange(double min, double max) {}
-                @Override public ServoController getController() { return null; }
-                @Override public int getPortNumber() { return 0; }
-                @Override public void setDirection(Direction dir) {}
-                @Override public Direction getDirection() { return Direction.FORWARD; }
-            };
+            return new MockServo();
         }
     }
 

@@ -8,18 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
-import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
-import org.firstinspires.ftc.teamcode.hardware.motor.Direction;
-import org.firstinspires.ftc.teamcode.hardware.motor.MotorHandler;
-import org.firstinspires.ftc.teamcode.hardware.motor.ZeroPowerBehavior;
-import org.firstinspires.ftc.teamcode.hardware.vision.VisionCamera;
-import org.firstinspires.ftc.teamcode.hardware.vision.VisionProcessor;
+import org.firstinspires.ftc.teamcode.hardware.*;
+import org.firstinspires.ftc.teamcode.hardware.motor.*;
+import org.firstinspires.ftc.teamcode.hardware.vision.*;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
@@ -30,7 +24,7 @@ public abstract class Robot extends LinearOpMode {
     public SampleMecanumDrive drive; // Roadrunner Driver
     public MotorHandler BL, FL, FR, BR; // Wheel Motors
     public MotorHandler roller, launcher; // Intake Outtake Motors
-    public Servo carousel, lift; // Carousel and Lift Servos
+    public ServoHandler carousel, lift; // Carousel and Lift Servos
     public ColorSensor colorSensor; // Color Sensor
     public VisionProcessor aprilTag;
     public VisionCamera visionPortal;

@@ -19,7 +19,7 @@ public class AutoShootMotif extends Robot {
     public void configure() {
         super.configure();
         drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(Positions.BLUE_UP.getPose2D());
+        drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
     }
 
     @Override
