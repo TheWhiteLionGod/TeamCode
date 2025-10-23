@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+@Disabled
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TestLauncher", group = "DYNABYTES")
 public class TestLauncher extends LinearOpMode {
     DcMotor OM;

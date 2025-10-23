@@ -28,6 +28,7 @@ public abstract class Robot extends LinearOpMode {
     public VisionCamera visionPortal;
     public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
+    public Alliance alliance; // Game Alliance
 
     // Gear Mode Variables
     double gearSwitchTime = 0.0;

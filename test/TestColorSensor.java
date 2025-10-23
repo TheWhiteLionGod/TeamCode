@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.test;
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
+@Disabled
 @Autonomous(name="TestColorSensor", group="Test")
 public class TestColorSensor extends LinearOpMode {
     ColorSensor colorSensor;

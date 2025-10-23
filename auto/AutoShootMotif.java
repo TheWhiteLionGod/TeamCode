@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.teamcode.Alliance;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
 import org.firstinspires.ftc.teamcode.Positions;
@@ -13,39 +15,53 @@ import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Autonomous(name = "ShootMotifBlue", group = "FTC2025")
+@Disabled
+@Autonomous(name = "AutoShootMotif", group = "FTC2025")
 public class AutoShootMotif extends Robot {
     @Override
     public void configure() {
         super.configure();
-        drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
+
+        if (alliance == null) { alliance = Alliance.BLUE; }
+        drive.setPoseEstimate(
+                alliance == Alliance.RED
+                ? Positions.RED_DOWN.getPose2D()
+                : Positions.BLUE_DOWN.getPose2D());
     }
 
     @Override
     public void run() {
         // Going to  Obelisk
         moveRobot(Trajectories.READ_OBELISK.getTrajectory(drive));
+        AprilTagDetection detection = getAprilTag(); // Reading April Tag
 
-        // Deciding Motif Pattern
-        AprilTagDetection detection = getAprilTag();
-        TrajectorySequence motifBallTraj = Trajectories.trajectoryTo(Positions.BLUE_PGP.getPose2D(), drive);
-        int[] shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.GREEN_BALL, Constants.PURPLE_BALL};
+        int tagId = (detection != null) ? detection.id : Constants.PGP_TAG_ID;
 
-        if (detection != null && detection.id == Constants.GPP_TAG_ID) {
-            motifBallTraj = Trajectories.trajectoryTo(Positions.BLUE_GPP.getPose2D(), drive);
-            shootingOrder = new int[]{Constants.GREEN_BALL, Constants.PURPLE_BALL, Constants.PURPLE_BALL};
+        Pose2d targetPose;
+        int[] shootingOrder;
+        TrajectorySequence motifBallTraj;
+
+        switch (tagId) {
+            case Constants.GPP_TAG_ID:
+                shootingOrder = new int[]{Constants.GREEN_BALL, Constants.PURPLE_BALL, Constants.PURPLE_BALL};
+                targetPose = (alliance == Alliance.BLUE) ? Positions.BLUE_GPP.getPose2D() : Positions.RED_GPP.getPose2D();
+                break;
+            case Constants.PPG_TAG_ID:
+                shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.PURPLE_BALL, Constants.GREEN_BALL};
+                targetPose = (alliance == Alliance.BLUE) ? Positions.BLUE_PPG.getPose2D() : Positions.RED_PPG.getPose2D();
+                break;
+            default: // PGP or null detection
+                shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.GREEN_BALL, Constants.PURPLE_BALL};
+                targetPose = (alliance == Alliance.BLUE) ? Positions.BLUE_PGP.getPose2D() : Positions.RED_PGP.getPose2D();
+                break;
         }
-        else if (detection != null && detection.id == Constants.PPG_TAG_ID) {
-            motifBallTraj = Trajectories.trajectoryTo(Positions.BLUE_PPG.getPose2D(), drive);
-            shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.PURPLE_BALL, Constants.GREEN_BALL};
-        }
-        visionPortal.close();
+        motifBallTraj = Trajectories.trajectoryTo(targetPose, drive);
 
         // Picking Up Motif Matching Ball
         forwardIntake();
         drive.followTrajectorySequenceAsync(motifBallTraj);
 
+        // Spinning Carousel while Driving
         while (drive.isBusy()) {
             updateOdometry();
             if (spinCarouselThread == null || !spinCarouselThread.isAlive()) {
@@ -57,10 +73,13 @@ public class AutoShootMotif extends Robot {
                 spinCarouselThread.start();
             }
         }
-        stopIntake();
+        stopIntake(); // Stopping Intake as Drivetrain has Arrived
 
         // Sorting Carousel and Shooting At Same Time
-        drive.followTrajectorySequenceAsync(Trajectories.SHOOT_BLUE.getTrajectory(drive));
+        drive.followTrajectorySequenceAsync(
+                alliance == Alliance.BLUE
+                ? Trajectories.SHOOT_BLUE.getTrajectory(drive)
+                : Trajectories.SHOOT_RED.getTrajectory(drive));
 
         // Waiting For Carousel to Finish Spinning from Intake while Driving
         while (drive.isBusy() && spinCarouselThread.isAlive()) {

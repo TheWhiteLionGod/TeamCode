@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.Positions;
 import org.firstinspires.ftc.teamcode.Trajectories;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 
+@Disabled
 @Autonomous(name = "AutoPickAndShoot", group = "FTC2025")
 public class AutoPickAndShoot extends Robot {
     @Override
