@@ -14,13 +14,13 @@ public abstract class Game extends LinearOpMode {
     @Override
     public void runOpMode() {
         if (auto == null || teleop == null) {
-            throw new NullPointerException("Auto or TeleOp Mode Not Defined");
+            throw new NullPointerException("Auto or TeleOp Mode is Null");
         }
         waitForStart();
 
         // Starting Autonomous
-        auto.configure();
         auto.game = this;
+        auto.configure();
 
         double start_time = getRuntime();
         Thread autoThread = new Thread(auto::run);
@@ -28,7 +28,8 @@ public abstract class Game extends LinearOpMode {
 
         // Making Sure Auto Runs for Only 30 Seconds
         while (autoThread.isAlive() && getRuntime() - start_time < 30) {}
-        if (autoThread.isAlive()) { autoThread.interrupt(); }
+        // Force Stop as Interrupt Exceptions are Caught
+        if (autoThread.isAlive()) { autoThread.stop(); }
 
         // Starting TeleOp
         teleop.configure();

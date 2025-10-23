@@ -10,9 +10,7 @@ import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
 import org.firstinspires.ftc.teamcode.Positions;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.Trajectories;
-import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @Disabled
@@ -21,12 +19,20 @@ public class AutoShootMotif extends Robot {
     @Override
     public void configure() {
         super.configure();
-
         if (alliance == null) { alliance = Alliance.BLUE; }
-        drive.setPoseEstimate(
-                alliance == Alliance.RED
-                ? Positions.RED_DOWN.getPose2D()
-                : Positions.BLUE_DOWN.getPose2D());
+
+        if (getAprilTag() == null) {
+            drive.setPoseEstimate(alliance == Alliance.BLUE
+                    ? Positions.BLUE_UP.getPose2D()
+                    : Positions.RED_UP.getPose2D()
+            );
+        }
+        else {
+            drive.setPoseEstimate(alliance == Alliance.BLUE
+                    ? Positions.BLUE_DOWN.getPose2D()
+                    : Positions.RED_DOWN.getPose2D()
+            );
+        }
     }
 
     @Override
@@ -37,29 +43,80 @@ public class AutoShootMotif extends Robot {
 
         int tagId = (detection != null) ? detection.id : Constants.PGP_TAG_ID;
 
-        Pose2d targetPose;
+        Pose2d motifBallPos;
         int[] shootingOrder;
-        TrajectorySequence motifBallTraj;
 
         switch (tagId) {
             case Constants.GPP_TAG_ID:
                 shootingOrder = new int[]{Constants.GREEN_BALL, Constants.PURPLE_BALL, Constants.PURPLE_BALL};
-                targetPose = (alliance == Alliance.BLUE) ? Positions.BLUE_GPP.getPose2D() : Positions.RED_GPP.getPose2D();
+                motifBallPos = (alliance == Alliance.BLUE) ? Positions.BLUE_GPP.getPose2D() : Positions.RED_GPP.getPose2D();
                 break;
             case Constants.PPG_TAG_ID:
                 shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.PURPLE_BALL, Constants.GREEN_BALL};
-                targetPose = (alliance == Alliance.BLUE) ? Positions.BLUE_PPG.getPose2D() : Positions.RED_PPG.getPose2D();
+                motifBallPos = (alliance == Alliance.BLUE) ? Positions.BLUE_PPG.getPose2D() : Positions.RED_PPG.getPose2D();
                 break;
             default: // PGP or null detection
                 shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.GREEN_BALL, Constants.PURPLE_BALL};
-                targetPose = (alliance == Alliance.BLUE) ? Positions.BLUE_PGP.getPose2D() : Positions.RED_PGP.getPose2D();
+                motifBallPos = (alliance == Alliance.BLUE) ? Positions.BLUE_PGP.getPose2D() : Positions.RED_PGP.getPose2D();
                 break;
         }
-        motifBallTraj = Trajectories.trajectoryTo(targetPose, drive);
+
+        // Shooting Preloaded Balls
+        drive.followTrajectorySequenceAsync(
+                alliance == Alliance.BLUE
+                        ? Trajectories.SHOOT_BLUE.getTrajectory(drive)
+                        : Trajectories.SHOOT_RED.getTrajectory(drive)
+        );
+
+        // Sorting Ball While Moving
+        spinCarouselThread = new FunctionThread(
+                shootingOrder[0] == Constants.GREEN_BALL
+                        ? this::findGreenBall
+                        : this::findPurpleBall,
+                () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME)
+        );
+
+        while (drive.isBusy()) {
+            updateOdometry();
+        }
+
+        // Waiting For Carousel to Finish
+        try { spinCarouselThread.join(); }
+        catch (InterruptedException ignored) {}
+
+        // Shooting First Ball
+        runLauncherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
+        runLauncherThread.start();
+
+        try { runLauncherThread.join(); }
+        catch (InterruptedException ignored) {}
+
+        // Shooting Second and Third Ball
+        for (int i = 1; i < 3; i++) {
+            // Getting Correct Ball
+            spinCarouselThread = (shootingOrder[i] == Constants.GREEN_BALL)
+                    ? new FunctionThread(this::findGreenBall, () -> {})
+                    : new FunctionThread(this::findPurpleBall, () -> {});
+            spinCarouselThread.start();
+
+            // Waiting For Carousel to Finish Spinning
+            try { spinCarouselThread.join(); }
+            catch (InterruptedException ignored) {}
+
+            // Shooting Ball
+            runLauncherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
+            runLauncherThread.start();
+
+            try { runLauncherThread.join(); }
+            catch (InterruptedException ignored) {}
+        }
+
+        // Moving to Center
+        drive.followTrajectorySequence(Trajectories.trajectoryTo(Positions.START.getPose2D(), drive));
 
         // Picking Up Motif Matching Ball
         forwardIntake();
-        drive.followTrajectorySequenceAsync(motifBallTraj);
+        drive.followTrajectorySequenceAsync(Trajectories.trajectoryTo(motifBallPos, drive));
 
         // Spinning Carousel while Driving
         while (drive.isBusy()) {
