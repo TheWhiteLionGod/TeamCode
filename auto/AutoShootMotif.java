@@ -5,12 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Alliance;
-import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.AprilTagId;
+import org.firstinspires.ftc.teamcode.BallColor;
+import org.firstinspires.ftc.teamcode.Timings;
 import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
 import org.firstinspires.ftc.teamcode.Positions;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.Trajectories;
-import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @Disabled
@@ -41,22 +42,24 @@ public class AutoShootMotif extends Robot {
         moveRobot(Trajectories.READ_OBELISK.getTrajectory(drive));
         AprilTagDetection detection = getAprilTag(); // Reading April Tag
 
-        int tagId = (detection != null) ? detection.id : Constants.PGP_TAG_ID;
+        AprilTagId tagId = detection == null ? null : AprilTagId.getTagFromId(detection.id);
+        if (tagId == null)
+            tagId = AprilTagId.PGP_TAG;
 
         Pose2d motifBallPos;
-        int[] shootingOrder;
+        BallColor[] shootingOrder;
 
         switch (tagId) {
-            case Constants.GPP_TAG_ID:
-                shootingOrder = new int[]{Constants.GREEN_BALL, Constants.PURPLE_BALL, Constants.PURPLE_BALL};
+            case GPP_TAG:
+                shootingOrder = new BallColor[]{BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};
                 motifBallPos = (alliance == Alliance.BLUE) ? Positions.BLUE_GPP.getPose2D() : Positions.RED_GPP.getPose2D();
                 break;
-            case Constants.PPG_TAG_ID:
-                shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.PURPLE_BALL, Constants.GREEN_BALL};
+            case PPG_TAG:
+                shootingOrder = new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN};
                 motifBallPos = (alliance == Alliance.BLUE) ? Positions.BLUE_PPG.getPose2D() : Positions.RED_PPG.getPose2D();
                 break;
             default: // PGP or null detection
-                shootingOrder = new int[]{Constants.PURPLE_BALL, Constants.GREEN_BALL, Constants.PURPLE_BALL};
+                shootingOrder = new BallColor[]{BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE};
                 motifBallPos = (alliance == Alliance.BLUE) ? Positions.BLUE_PGP.getPose2D() : Positions.RED_PGP.getPose2D();
                 break;
         }
@@ -70,10 +73,10 @@ public class AutoShootMotif extends Robot {
 
         // Sorting Ball While Moving
         spinCarouselThread = new FunctionThread(
-                shootingOrder[0] == Constants.GREEN_BALL
+                shootingOrder[0] == BallColor.GREEN
                         ? this::findGreenBall
                         : this::findPurpleBall,
-                () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME)
+                () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
         );
 
         while (drive.isBusy()) {
@@ -94,7 +97,7 @@ public class AutoShootMotif extends Robot {
         // Shooting Second and Third Ball
         for (int i = 1; i < 3; i++) {
             // Getting Correct Ball
-            spinCarouselThread = (shootingOrder[i] == Constants.GREEN_BALL)
+            spinCarouselThread = (shootingOrder[i] == BallColor.GREEN)
                     ? new FunctionThread(this::findGreenBall, () -> {})
                     : new FunctionThread(this::findPurpleBall, () -> {});
             spinCarouselThread.start();
@@ -125,7 +128,7 @@ public class AutoShootMotif extends Robot {
                 // Spin Carousel then Wait 500 Milliseconds Before Doing it Again
                 spinCarouselThread = new FunctionThread(
                         this::spinCarousel,
-                        () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME)
+                        () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
                 );
                 spinCarouselThread.start();
             }
@@ -149,7 +152,7 @@ public class AutoShootMotif extends Robot {
 
         for (int i = 0; i < 3; i++) {
             // Getting Correct Ball
-            spinCarouselThread = (shootingOrder[i] == Constants.GREEN_BALL)
+            spinCarouselThread = (shootingOrder[i] == BallColor.GREEN)
                     ? new FunctionThread(this::findGreenBall, () -> {})
                     : new FunctionThread(this::findPurpleBall, () -> {});
             spinCarouselThread.start();

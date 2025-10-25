@@ -32,7 +32,20 @@ public abstract class Robot extends LinearOpMode {
 
     // Gear Mode Variables
     double gearSwitchTime = 0.0;
-    double curGearMode = Constants.MAX_GEAR;
+    double curGearMode = GearMode.MAX_GEAR.getGear();
+
+    public enum Velocity {
+        LAUNCHER_VELOCITY(1000);
+
+        private final double velocity;
+        Velocity(double velocity) {
+            this.velocity = velocity;
+        }
+
+        public double getVelocity() {
+            return velocity;
+        }
+    }
 
     @Override
     public void runOpMode() {
@@ -128,11 +141,14 @@ public abstract class Robot extends LinearOpMode {
     }
 
     // Change Gear Mode of Robot
-    public void changeGearMode(int change_val) {
-        if (getRuntime() - gearSwitchTime >= Constants.GEAR_COOLDOWN) {
-            curGearMode = Math.min(Math.max(curGearMode + change_val, Constants.MIN_GEAR), Constants.MAX_GEAR);
-            gearSwitchTime = getRuntime();
+    public void changeGearMode(double change_val) {
+        if (getRuntime() - gearSwitchTime >= Timings.GEAR_COOLDOWN.getSeconds()) {
+            curGearMode = Math.min(
+                    Math.max(curGearMode + change_val, GearMode.MIN_GEAR.getGear()),
+                    GearMode.MAX_GEAR.getGear()
+            );
 
+            gearSwitchTime = getRuntime();
             telemetry.addData("Current Gear Mode", curGearMode);
             telemetry.update();
         }
@@ -154,7 +170,7 @@ public abstract class Robot extends LinearOpMode {
 
     // Regular Movement
     public void moveDrivetrain(double pwrx, double pwry) {
-        double gear_pwr = curGearMode / Constants.MAX_GEAR;
+        double gear_pwr = curGearMode / GearMode.MAX_GEAR.getGear();
         BL.setPower(gear_pwr*(-pwrx-pwry));
         FR.setPower(gear_pwr*(-pwrx-pwry));
 
@@ -164,7 +180,7 @@ public abstract class Robot extends LinearOpMode {
 
     // Turning
     public void turnDrivetrain(double pwr) {
-        double gear_pwr = curGearMode / Constants.MAX_GEAR;
+        double gear_pwr = curGearMode / GearMode.MAX_GEAR.getGear();
         BL.setPower(gear_pwr*pwr);
         FR.setPower(gear_pwr*-pwr);
 
@@ -207,21 +223,29 @@ public abstract class Robot extends LinearOpMode {
 
     public void updatePoseFromAprilTags() {
         AprilTagDetection aprilTag = getAprilTag();
-        if (aprilTag == null)
-            return;
+        if (aprilTag == null) return;
 
         Pose2d tagFieldPos;
-        if (aprilTag.id == Constants.BLUE_TAG_ID) {
-            tagFieldPos = Positions.BLUE_TAG.getPose2D();
-        }
-        else if (aprilTag.id == Constants.RED_TAG_ID) {
-            tagFieldPos = Positions.RED_TAG.getPose2D();
-        }
-        else if (aprilTag.id == Constants.GPP_TAG_ID || aprilTag.id == Constants.PGP_TAG_ID || aprilTag.id == Constants.PPG_TAG_ID) {
-            tagFieldPos = Positions.OBELISK.getPose2D();
-        }
-        else {
-            return;
+        AprilTagId aprilTagId = AprilTagId.getTagFromId(aprilTag.id);
+        if (aprilTagId == null) return;
+
+        switch (aprilTagId) {
+            case BLUE_TAG:
+                tagFieldPos = Positions.BLUE_TAG.getPose2D();
+                break;
+
+            case RED_TAG:
+                tagFieldPos = Positions.RED_TAG.getPose2D();
+                break;
+
+            case GPP_TAG:
+            case PGP_TAG:
+            case PPG_TAG:
+                tagFieldPos = Positions.OBELISK.getPose2D();
+                break;
+
+            default:
+                return;
         }
 
         // --- Step 1: Input and coordinate alignment ---
@@ -267,14 +291,14 @@ public abstract class Robot extends LinearOpMode {
     // Rotating Carousel to Next Position
     public void spinCarousel() {
         double cur_pos = carousel.getPosition();
-        if (cur_pos == Constants.CAROUSEL_POS_1) {
-            carousel.setPosition(Constants.CAROUSEL_POS_2);
+        if (cur_pos == ServoPos.CAROUSEL_POS_1.getPos()) {
+            carousel.setPosition(ServoPos.CAROUSEL_POS_2.getPos());
         }
-        else if (cur_pos == Constants.CAROUSEL_POS_2) {
-            carousel.setPosition(Constants.CAROUSEL_POS_3);
+        else if (cur_pos == ServoPos.CAROUSEL_POS_2.getPos()) {
+            carousel.setPosition(ServoPos.CAROUSEL_POS_3.getPos());
         }
-        else if (cur_pos == Constants.CAROUSEL_POS_3) {
-            carousel.setPosition(Constants.CAROUSEL_POS_1);
+        else if (cur_pos == ServoPos.CAROUSEL_POS_3.getPos()) {
+            carousel.setPosition(ServoPos.CAROUSEL_POS_1.getPos());
         }
     }
 
@@ -285,36 +309,34 @@ public abstract class Robot extends LinearOpMode {
 
     // Spinning Carousel for Specific Ball Color
     public void findGreenBall() throws InterruptedException {
-        findBall(Constants.GREEN_HUE_MIN, Constants.GREEN_HUE_MAX);
+        findBall(HueValues.GREEN_MIN, HueValues.GREEN_MAX);
     }
     public void findPurpleBall() throws InterruptedException {
-        findBall(Constants.PURPLE_HUE_MIN, Constants.PURPLE_HUE_MAX);
+        findBall(HueValues.PURPLE_MIN, HueValues.PURPLE_MAX);
     }
 
-    public void findBall(int min, int max) throws InterruptedException {
+    public void findBall(HueValues min, HueValues max) throws InterruptedException {
         for (int i = 0; i < 3; i++) {
             float[] hsvValues = colorSensor.hsv();
-            if (hsvValues[0] >= min
-                    && hsvValues[0] <= max) {
+            if (hsvValues[0] >= min.getHue()
+                    && hsvValues[0] <= max.getHue()) {
                 return;
             }
             spinCarousel();
-            Thread.sleep(Constants.CAROUSEL_SPIN_TIME);
+            Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds());
         }
     }
 
     public void startLauncher() throws InterruptedException {
         launcher.setPower(1);
-        while (launcher.getVelocity() < Constants.LAUNCHER_VELOCITY) {
-            Thread.sleep(100);
-        }
+        while (launcher.getVelocity() < Velocity.LAUNCHER_VELOCITY.getVelocity()) {}
 
-        lift.setPosition(Constants.LIFT_OUT_POS);
-        Thread.sleep(1000);
+        lift.setPosition(ServoPos.LIFT_OUT_POS.getPos());
+        Thread.sleep((long) Timings.LAUNCHER_SHOOT_TIME.getMilliseconds());
     }
 
     public void stopLauncher() {
-        lift.setPosition(Constants.LIFT_IN_POS);
+        lift.setPosition(ServoPos.LIFT_IN_POS.getPos());
         launcher.setPower(0);
     }
 }

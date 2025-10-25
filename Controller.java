@@ -79,19 +79,19 @@ public class Controller extends Robot {
                 }
                 else if (gamepad1.dpad_down) {
                     spinCarouselThread = new FunctionThread(this::spinCarousel,
-                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
+                            () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
                 else if (gamepad1.dpad_left) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_1),
-                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
+                    spinCarouselThread = new FunctionThread(() -> spinCarousel(ServoPos.CAROUSEL_POS_1.getPos()),
+                            () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
                 else if (gamepad1.dpad_up) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_2),
-                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
+                    spinCarouselThread = new FunctionThread(() -> spinCarousel(ServoPos.CAROUSEL_POS_2.getPos()),
+                            () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
                 else if (gamepad1.dpad_right) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(Constants.CAROUSEL_POS_3),
-                            () -> Thread.sleep(Constants.CAROUSEL_SPIN_TIME));
+                    spinCarouselThread = new FunctionThread(() -> spinCarousel(ServoPos.CAROUSEL_POS_3.getPos()),
+                            () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
 
                 if (spinCarouselThread != null)

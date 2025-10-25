@@ -6,6 +6,8 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 
+import javafx.geometry.Pos;
+
 public enum Trajectories {
     SAMPLE_TRAJ,
     SHOOT_RED, SHOOT_BLUE,
@@ -31,13 +33,13 @@ public enum Trajectories {
                 
             case SHOOT_RED:
                 return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToConstantHeading(new Vector2d(0, -1 * 12))
+                        .lineToLinearHeading(Positions.START.getPose2D())
                         .lineToLinearHeading(Positions.SCORE_RED.getPose2D())
                         .build();
                 
             case SHOOT_BLUE:
                 return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
-                        .lineToConstantHeading(new Vector2d(0, 12))
+                        .lineToLinearHeading(Positions.START.getPose2D())
                         .lineToLinearHeading(Positions.SCORE_BLUE.getPose2D())
                         .build();
 
