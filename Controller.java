@@ -17,10 +17,10 @@ public class Controller extends Robot {
 
             // Switching Gears
             if (gamepad1.y) {
-                changeGearMode(1);
+                gearModeUp();
             }
             else if (gamepad1.a) {
-                changeGearMode(-1);
+                gearModeDown();
             }
 
             // Field Drive Movement

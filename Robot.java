@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.hardware.motor.*;
 import org.firstinspires.ftc.teamcode.hardware.vision.*;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 @Disabled
@@ -31,8 +33,8 @@ public abstract class Robot extends LinearOpMode {
     public Alliance alliance; // Game Alliance
 
     // Gear Mode Variables
-    double gearSwitchTime = 0.0;
-    double curGearMode = GearMode.MAX_GEAR.getGear();
+    Instant gearSwitchTime = Instant.now();
+    GearMode gearMode = GearMode.THIRD_GEAR;
 
     public enum Velocity {
         LAUNCHER_VELOCITY(1000);
@@ -141,15 +143,20 @@ public abstract class Robot extends LinearOpMode {
     }
 
     // Change Gear Mode of Robot
-    public void changeGearMode(double change_val) {
-        if (getRuntime() - gearSwitchTime >= Timings.GEAR_COOLDOWN.getSeconds()) {
-            curGearMode = Math.min(
-                    Math.max(curGearMode + change_val, GearMode.MIN_GEAR.getGear()),
-                    GearMode.MAX_GEAR.getGear()
-            );
+    public void gearModeUp() {
+        changeGearMode(gearMode.gearUp());
+    }
 
-            gearSwitchTime = getRuntime();
-            telemetry.addData("Current Gear Mode", curGearMode);
+    public void gearModeDown() {
+        changeGearMode(gearMode.gearDown());
+    }
+
+    private void changeGearMode(GearMode nextGear) {
+        if (Duration.between(gearSwitchTime, Instant.now()).toMillis() >= Timings.GEAR_COOLDOWN.getMilliseconds()) {
+            gearMode = nextGear;
+            gearSwitchTime = Instant.now();
+
+            telemetry.addData("Current Gear Mode", gearMode.getGear());
             telemetry.update();
         }
     }
@@ -170,7 +177,7 @@ public abstract class Robot extends LinearOpMode {
 
     // Regular Movement
     public void moveDrivetrain(double pwrx, double pwry) {
-        double gear_pwr = curGearMode / GearMode.MAX_GEAR.getGear();
+        double gear_pwr = gearMode.getMultiplier();
         BL.setPower(gear_pwr*(-pwrx-pwry));
         FR.setPower(gear_pwr*(-pwrx-pwry));
 
@@ -180,7 +187,7 @@ public abstract class Robot extends LinearOpMode {
 
     // Turning
     public void turnDrivetrain(double pwr) {
-        double gear_pwr = curGearMode / GearMode.MAX_GEAR.getGear();
+        double gear_pwr = gearMode.getMultiplier();
         BL.setPower(gear_pwr*pwr);
         FR.setPower(gear_pwr*-pwr);
 

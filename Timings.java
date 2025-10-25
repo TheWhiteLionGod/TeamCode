@@ -16,6 +16,6 @@ public enum Timings {
     }
 
     public double getSeconds() {
-        return milliseconds * 1000;
+        return milliseconds / 1000;
     }
 }
