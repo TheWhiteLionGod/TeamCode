@@ -1,47 +1,45 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
-import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
-import org.firstinspires.ftc.teamcode.hardware.motor.Direction;
-import org.firstinspires.ftc.teamcode.hardware.motor.ZeroPowerBehavior;
 
 @TeleOp(name="Controller", group="FTC2025")
 public class Controller extends Robot {
     @Override
     public void run() {
         while (canRun()) {
-            updateOdometry();
+            odometry.updateOdometry();
 
             // Switching Gears
             if (gamepad1.y) {
-                gearModeUp();
+                drivetrain.gearModeUp();
             }
             else if (gamepad1.a) {
-                gearModeDown();
+                drivetrain.gearModeDown();
             }
 
             // Field Drive Movement
             if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                fieldDriveMove(gamepad1.left_stick_x, gamepad1.left_stick_y);
+                drivetrain.fieldDriveMove(
+                        gamepad1.left_stick_x,
+                        gamepad1.left_stick_y,
+                        odometry.getPoseEstimate().getHeading()
+                );
+            }
+            // Turning
+            else if (gamepad1.right_stick_x != 0) {
+                drivetrain.turnDrivetrain(gamepad1.right_stick_x);
             }
             else {
-                stopDrivetrain();
-            }
-
-            // Turning
-            if (gamepad1.right_stick_x != 0) {
-                turnDrivetrain(gamepad1.right_stick_x);
+                drivetrain.stopDrivetrain();
             }
 
             // Going to "Base"
             if (gamepad1.left_stick_button) {
-                goToBlueBase();
+                odometry.goToBlueBase();
             }
             else if (gamepad1.right_stick_button) {
-                goToRedBase();
+                odometry.goToRedBase();
             }
 
             // Roller Controls
@@ -62,9 +60,9 @@ public class Controller extends Robot {
                     runLauncherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
                     runLauncherThread.start();
                 }
-                else if (gamepad1.right_bumper && runLauncherThread != null && runLauncherThread.isAlive()) {
-                    runLauncherThread.interrupt();
-                }
+            }
+            else if (gamepad1.right_bumper && runLauncherThread != null && runLauncherThread.isAlive()) {
+                runLauncherThread.interrupt();
             }
 
             // Carousel Controls
@@ -102,7 +100,7 @@ public class Controller extends Robot {
             sleep(50);
         }
 
-        stopDrivetrain(); // Stopping Drivetrain
+        drivetrain.stopDrivetrain(); // Stopping Drivetrain
         stopIntake(); // Stopping Intake
 
         // Stopping Carousel

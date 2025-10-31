@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.Positions;
 import org.firstinspires.ftc.teamcode.Trajectories;
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.odometry.Odometry;
 
 @Disabled
 @Autonomous(name = "AutoPickAndShoot", group = "FTC2025")
@@ -14,14 +15,14 @@ public class AutoPickAndShoot extends Robot {
     @Override
     public void configure() {
         super.configure();
-        drive = new SampleMecanumDrive(hardwareMap);
-        drive.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
+        odometry = new Odometry(hardwareMap, telemetry);
+        odometry.setPoseEstimate(Positions.BLUE_DOWN.getPose2D());
     }
 
     @Override
     public void run() {
         // Moving Robot
-        moveRobot(Trajectories.trajectoryTo(Positions.BLUE_PPG.getPose2D(), drive));
-        moveRobot(Trajectories.SHOOT_BLUE.getTrajectory(drive));
+        odometry.moveRobot(Trajectories.trajectoryTo(Positions.BLUE_PPG.getPose2D(), odometry), this::canRun);
+        odometry.moveRobot(Trajectories.SHOOT_BLUE.getTrajectory(odometry), this::canRun);
     }
 }

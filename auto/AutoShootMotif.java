@@ -23,13 +23,13 @@ public class AutoShootMotif extends Robot {
         if (alliance == null) { alliance = Alliance.BLUE; }
 
         if (getAprilTag() == null) {
-            drive.setPoseEstimate(alliance == Alliance.BLUE
+            odometry.setPoseEstimate(alliance == Alliance.BLUE
                     ? Positions.BLUE_UP.getPose2D()
                     : Positions.RED_UP.getPose2D()
             );
         }
         else {
-            drive.setPoseEstimate(alliance == Alliance.BLUE
+            odometry.setPoseEstimate(alliance == Alliance.BLUE
                     ? Positions.BLUE_DOWN.getPose2D()
                     : Positions.RED_DOWN.getPose2D()
             );
@@ -39,7 +39,7 @@ public class AutoShootMotif extends Robot {
     @Override
     public void run() {
         // Going to  Obelisk
-        moveRobot(Trajectories.READ_OBELISK.getTrajectory(drive));
+        odometry.moveRobot(Trajectories.READ_OBELISK.getTrajectory(odometry), this::canRun);
         AprilTagDetection detection = getAprilTag(); // Reading April Tag
 
         AprilTagId tagId = detection == null ? null : AprilTagId.getTagFromId(detection.id);
@@ -65,10 +65,10 @@ public class AutoShootMotif extends Robot {
         }
 
         // Shooting Preloaded Balls
-        drive.followTrajectorySequenceAsync(
+        odometry.followTrajectorySequenceAsync(
                 alliance == Alliance.BLUE
-                        ? Trajectories.SHOOT_BLUE.getTrajectory(drive)
-                        : Trajectories.SHOOT_RED.getTrajectory(drive)
+                        ? Trajectories.SHOOT_BLUE.getTrajectory(odometry)
+                        : Trajectories.SHOOT_RED.getTrajectory(odometry)
         );
 
         // Sorting Ball While Moving
@@ -79,8 +79,8 @@ public class AutoShootMotif extends Robot {
                 () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
         );
 
-        while (drive.isBusy()) {
-            updateOdometry();
+        while (odometry.isBusy()) {
+            odometry.updateOdometry();
         }
 
         // Waiting For Carousel to Finish
@@ -115,15 +115,15 @@ public class AutoShootMotif extends Robot {
         }
 
         // Moving to Center
-        drive.followTrajectorySequence(Trajectories.trajectoryTo(Positions.START.getPose2D(), drive));
+        odometry.followTrajectorySequence(Trajectories.trajectoryTo(Positions.START.getPose2D(), odometry));
 
         // Picking Up Motif Matching Ball
         forwardIntake();
-        drive.followTrajectorySequenceAsync(Trajectories.trajectoryTo(motifBallPos, drive));
+        odometry.followTrajectorySequenceAsync(Trajectories.trajectoryTo(motifBallPos, odometry));
 
         // Spinning Carousel while Driving
-        while (drive.isBusy()) {
-            updateOdometry();
+        while (odometry.isBusy()) {
+            odometry.updateOdometry();
             if (spinCarouselThread == null || !spinCarouselThread.isAlive()) {
                 // Spin Carousel then Wait 500 Milliseconds Before Doing it Again
                 spinCarouselThread = new FunctionThread(
@@ -136,14 +136,14 @@ public class AutoShootMotif extends Robot {
         stopIntake(); // Stopping Intake as Drivetrain has Arrived
 
         // Sorting Carousel and Shooting At Same Time
-        drive.followTrajectorySequenceAsync(
+        odometry.followTrajectorySequenceAsync(
                 alliance == Alliance.BLUE
-                ? Trajectories.SHOOT_BLUE.getTrajectory(drive)
-                : Trajectories.SHOOT_RED.getTrajectory(drive));
+                ? Trajectories.SHOOT_BLUE.getTrajectory(odometry)
+                : Trajectories.SHOOT_RED.getTrajectory(odometry));
 
         // Waiting For Carousel to Finish Spinning from Intake while Driving
-        while (drive.isBusy() && spinCarouselThread.isAlive()) {
-            updateOdometry();
+        while (odometry.isBusy() && spinCarouselThread.isAlive()) {
+            odometry.updateOdometry();
         }
 
         // Will Block Only If Carousel is Still Running and Robot No Longer Driving
@@ -158,8 +158,8 @@ public class AutoShootMotif extends Robot {
             spinCarouselThread.start();
 
             // Waiting For Carousel to Finish Spinning
-            while (drive.isBusy() || spinCarouselThread.isAlive()) {
-                updateOdometry();
+            while (odometry.isBusy() || spinCarouselThread.isAlive()) {
+                odometry.updateOdometry();
             }
 
             // Shooting Ball
@@ -171,6 +171,14 @@ public class AutoShootMotif extends Robot {
         }
 
         // Moving Robot 2 Feet Away From Obelisk to Not Block Allies
-        moveRobot(Trajectories.trajectoryTo(Positions.OBELISK.getPose2D().minus(new Pose2d(2 * 12, 0, Math.toRadians(0))), drive));
+        odometry.moveRobot(
+                Trajectories.trajectoryTo(
+                        Positions.OBELISK.getPose2D().minus(
+                                new Pose2d(2 * 12, 0, Math.toRadians(0))
+                        ),
+                        odometry
+                ),
+                this::canRun
+        );
     }
 }

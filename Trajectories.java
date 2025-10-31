@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.mechanisms.odometry.Odometry;
 
 public enum Trajectories {
     SAMPLE_TRAJ,
@@ -11,7 +12,7 @@ public enum Trajectories {
     GO_RED_BASE, GO_BLUE_BASE,
     READ_OBELISK;
 
-    public TrajectorySequence getTrajectory(SampleMecanumDrive drive) {
+    public TrajectorySequence getTrajectory(Odometry drive) {
         switch (this) {
             case SAMPLE_TRAJ:
                 return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
@@ -60,7 +61,7 @@ public enum Trajectories {
         }
     }
 
-    public static TrajectorySequence trajectoryTo(Pose2d pose, SampleMecanumDrive drive) {
+    public static TrajectorySequence trajectoryTo(Pose2d pose, Odometry drive) {
         return drive.trajectorySequenceBuilder(drive.getPoseEstimate())
                 .lineToLinearHeading(pose)
                 .build();

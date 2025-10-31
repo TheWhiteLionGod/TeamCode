@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.hardware.*;
 import org.firstinspires.ftc.teamcode.hardware.color.ColorSensorHandler;
 import org.firstinspires.ftc.teamcode.hardware.motor.*;
 import org.firstinspires.ftc.teamcode.hardware.vision.*;
+import org.firstinspires.ftc.teamcode.mechanisms.drivetrain.FieldDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.odometry.Odometry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.time.Duration;
@@ -21,8 +23,8 @@ import java.util.List;
 @Disabled
 @TeleOp(name = "Robot", group = "FTC2025")
 public abstract class Robot extends LinearOpMode {
-    public SampleMecanumDrive drive; // Roadrunner Driver
-    public MotorHandler BL, FL, FR, BR; // Wheel Motors
+    public Odometry odometry;
+    public FieldDrive drivetrain;
     public MotorHandler roller, launcher; // Intake Outtake Motors
     public ServoHandler carousel, lift; // Carousel and Lift Servos
     public ColorSensorHandler colorSensor; // Color Sensor
@@ -31,10 +33,6 @@ public abstract class Robot extends LinearOpMode {
     public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
     public Alliance alliance; // Game Alliance
-
-    // Gear Mode Variables
-    Instant gearSwitchTime = Instant.now();
-    GearMode gearMode = GearMode.THIRD_GEAR;
 
     public enum Velocity {
         LAUNCHER_VELOCITY(1000);
@@ -60,18 +58,8 @@ public abstract class Robot extends LinearOpMode {
     public void configure() {
         SafeHardwareMap safeHardwareMap = new SafeHardwareMap(hardwareMap, telemetry);
 
-        BL = safeHardwareMap.getMotor("BL");
-        FL = safeHardwareMap.getMotor("FL");
-        FR = safeHardwareMap.getMotor("FR");
-        BR = safeHardwareMap.getMotor("BR");
-
-        BL.setDirection(Direction.REVERSE);
-        FL.setDirection(Direction.REVERSE);
-
-        BL.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        FL.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        FR.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        BR.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        // Creating New Drivetrain
+        drivetrain = new FieldDrive(safeHardwareMap, telemetry);
 
         launcher = safeHardwareMap.getMotor("Launcher");
         roller = safeHardwareMap.getMotor("Roller");
@@ -86,7 +74,7 @@ public abstract class Robot extends LinearOpMode {
         aprilTag = safeHardwareMap.getAprilTagProcessor();
         visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");
 
-        drive = new SampleMecanumDrive(hardwareMap);
+        odometry = new Odometry(hardwareMap, telemetry);
         telemetry.update();
     }
 
@@ -96,111 +84,6 @@ public abstract class Robot extends LinearOpMode {
     // Checks if OpModeIsActive
     public boolean canRun() {
         return game.opModeIsActive();
-    }
-
-    // Update Odometry via RoadRunner
-    public void updateOdometry() {
-        drive.update(); // Update Roadrunner
-        updatePoseFromAprilTags(); // Update April Tag
-    }
-
-    // Making Robot Follow Trajectory
-    public void moveRobot(TrajectorySequence traj) {
-        drive.followTrajectorySequenceAsync(traj);
-
-        // Updating Robot Position
-        while (canRun() && drive.isBusy()) {
-            drive.update();
-            telemetry.addData("Robot Position: ", drive.getPoseEstimate());
-            telemetry.update();
-        }
-
-        // Printing Deviation in Position Once Completed
-        telemetry.addData("Expected End Position: ", traj.end());
-        telemetry.addData("Current Position: ", drive.getPoseEstimate());
-        telemetry.update();
-    }
-
-    // These Functions Make Robot Go To Base
-    public void goToRedBase() {
-        try {
-            drive.followTrajectorySequence(Trajectories.GO_RED_BASE.getTrajectory(drive));
-        }
-        catch (EmptyPathSegmentException e) {
-            System.out.println("Empty Path Segment Exception has Occurred\n" +
-                    "This means that the robot is already at the defined position");
-        }
-    }
-
-    public void goToBlueBase() {
-        try {
-            drive.followTrajectorySequence(Trajectories.GO_BLUE_BASE.getTrajectory(drive));
-        }
-        catch (EmptyPathSegmentException e) {
-            System.out.println("Empty Path Segment Exception has Occurred\n" +
-                    "This means that the robot is already at the defined position");
-        }
-    }
-
-    // Change Gear Mode of Robot
-    public void gearModeUp() {
-        changeGearMode(gearMode.gearUp());
-    }
-
-    public void gearModeDown() {
-        changeGearMode(gearMode.gearDown());
-    }
-
-    private void changeGearMode(GearMode nextGear) {
-        if (Duration.between(gearSwitchTime, Instant.now()).toMillis() >= Timings.GEAR_COOLDOWN.getMilliseconds()) {
-            gearMode = nextGear;
-            gearSwitchTime = Instant.now();
-
-            telemetry.addData("Current Gear Mode", gearMode.getGear());
-            telemetry.update();
-        }
-    }
-
-
-    // Field Drive Movement
-    public void fieldDriveMove(double pwr_x, double pwr_y) {
-        /* Adjust Joystick X/Y inputs by navX MXP yaw angle */
-        double yaw_radians = drive.getPoseEstimate().getHeading();
-        double temp = pwr_y * Math.cos(yaw_radians) + pwr_x * Math.sin(yaw_radians);
-        pwr_x = -pwr_y * Math.sin(yaw_radians) + pwr_x * Math.cos(yaw_radians);
-        pwr_y = temp;
-
-        /* At this point, Joystick X/Y (strafe/forward) vectors have been */
-        /* rotated by the gyro angle, and can be sent to drive system */
-        moveDrivetrain(pwr_x, pwr_y);
-    }
-
-    // Regular Movement
-    public void moveDrivetrain(double pwrx, double pwry) {
-        double gear_pwr = gearMode.getMultiplier();
-        BL.setPower(gear_pwr*(-pwrx-pwry));
-        FR.setPower(gear_pwr*(-pwrx-pwry));
-
-        FL.setPower(gear_pwr*(pwrx-pwry));
-        BR.setPower(gear_pwr*(pwrx-pwry));
-    }
-
-    // Turning
-    public void turnDrivetrain(double pwr) {
-        double gear_pwr = gearMode.getMultiplier();
-        BL.setPower(gear_pwr*pwr);
-        FR.setPower(gear_pwr*-pwr);
-
-        FL.setPower(0);
-        BR.setPower(0);
-    }
-
-    // Stopping Drivetrain
-    public void stopDrivetrain() {
-        BL.setPower(0);
-        FL.setPower(0);
-        FR.setPower(0);
-        BR.setPower(0);
     }
 
     // Intake Functions
@@ -287,12 +170,12 @@ public abstract class Robot extends LinearOpMode {
                 camFieldPos.getHeading() - camRobotPos.getHeading()
         );
 
-        telemetry.addData("Robot Positon in Road Runner", drive.getPoseEstimate());
+        telemetry.addData("Robot Positon in Road Runner", odometry.getPoseEstimate());
         telemetry.addData("Robot Position in April Tag", robotPos);
-        telemetry.addData("Difference", drive.getPoseEstimate().minus(robotPos));
+        telemetry.addData("Difference", odometry.getPoseEstimate().minus(robotPos));
         telemetry.update();
 
-        drive.setPoseEstimate(robotPos);
+        odometry.setPoseEstimate(robotPos);
     }
 
     // Rotating Carousel to Next Position

@@ -33,7 +33,7 @@ public abstract class Game extends LinearOpMode {
 
         // Starting TeleOp
         teleop.configure();
-        teleop.drive.setPoseEstimate(auto.drive.getPoseEstimate()); // Transferring Auto Position Data
+        teleop.odometry.setPoseEstimate(auto.odometry.getPoseEstimate()); // Transferring Auto Position Data
 
         teleop.game = this;
         teleop.run();
