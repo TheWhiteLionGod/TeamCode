@@ -19,7 +19,7 @@ public class Odometry {
         this.telemetry = telemetry;
     }
 
-    public void updateOdometry() {
+    public void update() {
         drive.update(); // Update Roadrunner
 //        updatePoseFromAprilTags(); // Update April Tag
     }

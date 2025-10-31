@@ -74,13 +74,13 @@ public class AutoShootMotif extends Robot {
         // Sorting Ball While Moving
         spinCarouselThread = new FunctionThread(
                 shootingOrder[0] == BallColor.GREEN
-                        ? this::findGreenBall
-                        : this::findPurpleBall,
+                        ? () -> carousel.findGreenBall(colorSensor)
+                        : () -> carousel.findPurpleBall(colorSensor),
                 () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
         );
 
         while (odometry.isBusy()) {
-            odometry.updateOdometry();
+            odometry.update();
         }
 
         // Waiting For Carousel to Finish
@@ -98,8 +98,8 @@ public class AutoShootMotif extends Robot {
         for (int i = 1; i < 3; i++) {
             // Getting Correct Ball
             spinCarouselThread = (shootingOrder[i] == BallColor.GREEN)
-                    ? new FunctionThread(this::findGreenBall, () -> {})
-                    : new FunctionThread(this::findPurpleBall, () -> {});
+                    ? new FunctionThread(() -> carousel.findGreenBall(colorSensor), () -> {})
+                    : new FunctionThread(() -> carousel.findPurpleBall(colorSensor), () -> {});
             spinCarouselThread.start();
 
             // Waiting For Carousel to Finish Spinning
@@ -118,22 +118,22 @@ public class AutoShootMotif extends Robot {
         odometry.followTrajectorySequence(Trajectories.trajectoryTo(Positions.START.getPose2D(), odometry));
 
         // Picking Up Motif Matching Ball
-        forwardIntake();
+        roller.forward();
         odometry.followTrajectorySequenceAsync(Trajectories.trajectoryTo(motifBallPos, odometry));
 
         // Spinning Carousel while Driving
         while (odometry.isBusy()) {
-            odometry.updateOdometry();
+            odometry.update();
             if (spinCarouselThread == null || !spinCarouselThread.isAlive()) {
                 // Spin Carousel then Wait 500 Milliseconds Before Doing it Again
                 spinCarouselThread = new FunctionThread(
-                        this::spinCarousel,
+                        carousel::spin,
                         () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
                 );
                 spinCarouselThread.start();
             }
         }
-        stopIntake(); // Stopping Intake as Drivetrain has Arrived
+        roller.stop(); // Stopping Intake as Drivetrain has Arrived
 
         // Sorting Carousel and Shooting At Same Time
         odometry.followTrajectorySequenceAsync(
@@ -143,7 +143,7 @@ public class AutoShootMotif extends Robot {
 
         // Waiting For Carousel to Finish Spinning from Intake while Driving
         while (odometry.isBusy() && spinCarouselThread.isAlive()) {
-            odometry.updateOdometry();
+            odometry.update();
         }
 
         // Will Block Only If Carousel is Still Running and Robot No Longer Driving
@@ -153,13 +153,13 @@ public class AutoShootMotif extends Robot {
         for (int i = 0; i < 3; i++) {
             // Getting Correct Ball
             spinCarouselThread = (shootingOrder[i] == BallColor.GREEN)
-                    ? new FunctionThread(this::findGreenBall, () -> {})
-                    : new FunctionThread(this::findPurpleBall, () -> {});
+                    ? new FunctionThread(() -> carousel.findGreenBall(colorSensor), () -> {})
+                    : new FunctionThread(() -> carousel.findPurpleBall(colorSensor), () -> {});
             spinCarouselThread.start();
 
             // Waiting For Carousel to Finish Spinning
             while (odometry.isBusy() || spinCarouselThread.isAlive()) {
-                odometry.updateOdometry();
+                odometry.update();
             }
 
             // Shooting Ball

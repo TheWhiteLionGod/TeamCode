@@ -35,9 +35,9 @@ public class FieldDrive {
     }
 
     // Change Gear Mode of Robot
-    public void gearModeUp() { changeGearMode(gearMode.gearUp()); }
+    public void gearUp() { changeGearMode(gearMode.gearUp()); }
 
-    public void gearModeDown() { changeGearMode(gearMode.gearDown()); }
+    public void gearDown() { changeGearMode(gearMode.gearDown()); }
 
     private void changeGearMode(GearMode nextGear) {
         if (Duration.between(gearSwitchTime, Instant.now()).toMillis() >= Timings.GEAR_COOLDOWN.getMilliseconds()) {
@@ -51,7 +51,7 @@ public class FieldDrive {
 
 
     // Field Drive Movement
-    public void fieldDriveMove(double pwr_x, double pwr_y, double yawRadians) {
+    public void fieldDrive(double pwr_x, double pwr_y, double yawRadians) {
         /* Adjust Joystick X/Y inputs by navX MXP yaw angle */
         double temp = pwr_y * Math.cos(yawRadians) + pwr_x * Math.sin(yawRadians);
         pwr_x = -pwr_y * Math.sin(yawRadians) + pwr_x * Math.cos(yawRadians);
@@ -59,11 +59,11 @@ public class FieldDrive {
 
         /* At this point, Joystick X/Y (strafe/forward) vectors have been */
         /* rotated by the gyro angle, and can be sent to drive system */
-        moveDrivetrain(pwr_x, pwr_y);
+        robotDrive(pwr_x, pwr_y);
     }
 
     // Regular Movement
-    public void moveDrivetrain(double pwrx, double pwry) {
+    public void robotDrive(double pwrx, double pwry) {
         double gear_pwr = gearMode.getMultiplier();
         BL.setPower(gear_pwr*(-pwrx-pwry));
         FR.setPower(gear_pwr*(-pwrx-pwry));
@@ -73,7 +73,7 @@ public class FieldDrive {
     }
 
     // Turning
-    public void turnDrivetrain(double pwr) {
+    public void turn(double pwr) {
         double gear_pwr = gearMode.getMultiplier();
         BL.setPower(gear_pwr*pwr);
         FR.setPower(gear_pwr*-pwr);
@@ -83,7 +83,7 @@ public class FieldDrive {
     }
 
     // Stopping Drivetrain
-    public void stopDrivetrain() {
+    public void stop() {
         BL.setPower(0);
         FL.setPower(0);
         FR.setPower(0);

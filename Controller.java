@@ -8,19 +8,19 @@ public class Controller extends Robot {
     @Override
     public void run() {
         while (canRun()) {
-            odometry.updateOdometry();
+            odometry.update();
 
             // Switching Gears
             if (gamepad1.y) {
-                drivetrain.gearModeUp();
+                drivetrain.gearUp();
             }
             else if (gamepad1.a) {
-                drivetrain.gearModeDown();
+                drivetrain.gearDown();
             }
 
             // Field Drive Movement
             if (gamepad1.left_stick_x != 0 || gamepad1.left_stick_y != 0) {
-                drivetrain.fieldDriveMove(
+                drivetrain.fieldDrive(
                         gamepad1.left_stick_x,
                         gamepad1.left_stick_y,
                         odometry.getPoseEstimate().getHeading()
@@ -28,10 +28,10 @@ public class Controller extends Robot {
             }
             // Turning
             else if (gamepad1.right_stick_x != 0) {
-                drivetrain.turnDrivetrain(gamepad1.right_stick_x);
+                drivetrain.turn(gamepad1.right_stick_x);
             }
             else {
-                drivetrain.stopDrivetrain();
+                drivetrain.stop();
             }
 
             // Going to "Base"
@@ -44,13 +44,13 @@ public class Controller extends Robot {
 
             // Roller Controls
             if (gamepad1.left_trigger != 0) {
-                forwardIntake();
+                roller.forward();
             }
             else if (gamepad1.left_bumper) {
-                backwardIntake();
+                roller.reverse();
             }
             else {
-                stopIntake();
+                roller.stop();
             }
 
             // Launcher Controls
@@ -70,25 +70,25 @@ public class Controller extends Robot {
                     && (runLauncherThread == null || !runLauncherThread.isAlive())) {
 
                 if (gamepad1.x) {
-                    spinCarouselThread = new FunctionThread(this::findGreenBall, () -> {});
+                    spinCarouselThread = new FunctionThread(() -> carousel.findGreenBall(colorSensor), () -> {});
                 }
                 else if (gamepad1.b) {
-                    spinCarouselThread = new FunctionThread(this::findPurpleBall, () -> {});
+                    spinCarouselThread = new FunctionThread(() -> carousel.findPurpleBall(colorSensor), () -> {});
                 }
                 else if (gamepad1.dpad_down) {
-                    spinCarouselThread = new FunctionThread(this::spinCarousel,
+                    spinCarouselThread = new FunctionThread(carousel::spin,
                             () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
                 else if (gamepad1.dpad_left) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(ServoPos.CAROUSEL_POS_1.getPos()),
+                    spinCarouselThread = new FunctionThread(() -> carousel.spin(ServoPos.CAROUSEL_POS_1.getPos()),
                             () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
                 else if (gamepad1.dpad_up) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(ServoPos.CAROUSEL_POS_2.getPos()),
+                    spinCarouselThread = new FunctionThread(() -> carousel.spin(ServoPos.CAROUSEL_POS_2.getPos()),
                             () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
                 else if (gamepad1.dpad_right) {
-                    spinCarouselThread = new FunctionThread(() -> spinCarousel(ServoPos.CAROUSEL_POS_3.getPos()),
+                    spinCarouselThread = new FunctionThread(() -> carousel.spin(ServoPos.CAROUSEL_POS_3.getPos()),
                             () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
                 }
 
@@ -100,8 +100,8 @@ public class Controller extends Robot {
             sleep(50);
         }
 
-        drivetrain.stopDrivetrain(); // Stopping Drivetrain
-        stopIntake(); // Stopping Intake
+        drivetrain.stop(); // Stopping Drivetrain
+        roller.stop(); // Stopping Intake
 
         // Stopping Carousel
         if (spinCarouselThread != null && spinCarouselThread.isAlive()) {

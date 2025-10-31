@@ -1,23 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.path.EmptyPathSegmentException;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.roadrunner.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.hardware.*;
 import org.firstinspires.ftc.teamcode.hardware.color.ColorSensorHandler;
 import org.firstinspires.ftc.teamcode.hardware.motor.*;
 import org.firstinspires.ftc.teamcode.hardware.vision.*;
 import org.firstinspires.ftc.teamcode.mechanisms.drivetrain.FieldDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.intake.Carousel;
+import org.firstinspires.ftc.teamcode.mechanisms.intake.Roller;
 import org.firstinspires.ftc.teamcode.mechanisms.odometry.Odometry;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 @Disabled
@@ -25,8 +22,10 @@ import java.util.List;
 public abstract class Robot extends LinearOpMode {
     public Odometry odometry;
     public FieldDrive drivetrain;
-    public MotorHandler roller, launcher; // Intake Outtake Motors
-    public ServoHandler carousel, lift; // Carousel and Lift Servos
+    public Roller roller;
+    public Carousel carousel;
+    public MotorHandler launcher; // Intake Outtake Motors
+    public ServoHandler lift; // Carousel and Lift Servos
     public ColorSensorHandler colorSensor; // Color Sensor
     public VisionProcessor aprilTag;
     public VisionCamera visionPortal;
@@ -61,13 +60,12 @@ public abstract class Robot extends LinearOpMode {
         // Creating New Drivetrain
         drivetrain = new FieldDrive(safeHardwareMap, telemetry);
 
+        roller = new Roller(safeHardwareMap);
+
         launcher = safeHardwareMap.getMotor("Launcher");
-        roller = safeHardwareMap.getMotor("Roller");
-
         launcher.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
-        roller.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
 
-        carousel = safeHardwareMap.getServo("Carousel");
+        carousel = new Carousel(safeHardwareMap, telemetry);
         lift = safeHardwareMap.getServo("Lift");
         colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
 
@@ -84,19 +82,6 @@ public abstract class Robot extends LinearOpMode {
     // Checks if OpModeIsActive
     public boolean canRun() {
         return game.opModeIsActive();
-    }
-
-    // Intake Functions
-    public void forwardIntake() {
-        roller.setPower(0.5);
-    }
-
-    public void backwardIntake() {
-        roller.setPower(-0.5);
-    }
-
-    public void stopIntake() {
-        roller.setPower(0);
     }
 
     // Reading April Tags
@@ -176,45 +161,6 @@ public abstract class Robot extends LinearOpMode {
         telemetry.update();
 
         odometry.setPoseEstimate(robotPos);
-    }
-
-    // Rotating Carousel to Next Position
-    public void spinCarousel() {
-        double cur_pos = carousel.getPosition();
-        if (cur_pos == ServoPos.CAROUSEL_POS_1.getPos()) {
-            carousel.setPosition(ServoPos.CAROUSEL_POS_2.getPos());
-        }
-        else if (cur_pos == ServoPos.CAROUSEL_POS_2.getPos()) {
-            carousel.setPosition(ServoPos.CAROUSEL_POS_3.getPos());
-        }
-        else if (cur_pos == ServoPos.CAROUSEL_POS_3.getPos()) {
-            carousel.setPosition(ServoPos.CAROUSEL_POS_1.getPos());
-        }
-    }
-
-    // Spinning Carousel to Given Position
-    public void spinCarousel(double new_pos) {
-        carousel.setPosition(new_pos);
-    }
-
-    // Spinning Carousel for Specific Ball Color
-    public void findGreenBall() throws InterruptedException {
-        findBall(HueValues.GREEN_MIN, HueValues.GREEN_MAX);
-    }
-    public void findPurpleBall() throws InterruptedException {
-        findBall(HueValues.PURPLE_MIN, HueValues.PURPLE_MAX);
-    }
-
-    public void findBall(HueValues min, HueValues max) throws InterruptedException {
-        for (int i = 0; i < 3; i++) {
-            float[] hsvValues = colorSensor.hsv();
-            if (hsvValues[0] >= min.getHue()
-                    && hsvValues[0] <= max.getHue()) {
-                return;
-            }
-            spinCarousel();
-            Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds());
-        }
     }
 
     public void startLauncher() throws InterruptedException {
