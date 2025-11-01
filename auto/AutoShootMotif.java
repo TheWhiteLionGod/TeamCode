@@ -88,7 +88,7 @@ public class AutoShootMotif extends Robot {
         catch (InterruptedException ignored) {}
 
         // Shooting First Ball
-        runLauncherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
+        runLauncherThread = new FunctionThread(launcher::startLauncher, launcher::stopLauncher);
         runLauncherThread.start();
 
         try { runLauncherThread.join(); }
@@ -107,7 +107,7 @@ public class AutoShootMotif extends Robot {
             catch (InterruptedException ignored) {}
 
             // Shooting Ball
-            runLauncherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
+            runLauncherThread = new FunctionThread(launcher::startLauncher, launcher::stopLauncher);
             runLauncherThread.start();
 
             try { runLauncherThread.join(); }
@@ -163,7 +163,7 @@ public class AutoShootMotif extends Robot {
             }
 
             // Shooting Ball
-            runLauncherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
+            runLauncherThread = new FunctionThread(launcher::startLauncher, launcher::stopLauncher);
             runLauncherThread.start();
 
             try { runLauncherThread.join(); }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms.intake;
 
 import org.firstinspires.ftc.teamcode.hardware.SafeHardwareMap;
+import org.firstinspires.ftc.teamcode.hardware.motor.Direction;
 import org.firstinspires.ftc.teamcode.hardware.motor.MotorHandler;
 import org.firstinspires.ftc.teamcode.hardware.motor.ZeroPowerBehavior;
 
@@ -10,6 +11,7 @@ public class Roller {
     public Roller(SafeHardwareMap safeHardwareMap) {
         roller = safeHardwareMap.getMotor("Roller");
         roller.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        roller.setDirection(Direction.REVERSE);
     }
 
     // Intake Functions

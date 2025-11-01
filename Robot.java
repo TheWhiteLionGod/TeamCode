@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.drivetrain.FieldDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.intake.Carousel;
 import org.firstinspires.ftc.teamcode.mechanisms.intake.Roller;
 import org.firstinspires.ftc.teamcode.mechanisms.odometry.Odometry;
+import org.firstinspires.ftc.teamcode.mechanisms.outtake.Launcher;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
@@ -24,12 +25,10 @@ public abstract class Robot extends LinearOpMode {
     public FieldDrive drivetrain;
     public Roller roller;
     public Carousel carousel;
-    public MotorHandler launcher; // Intake Outtake Motors
-    public ServoHandler lift; // Carousel and Lift Servos
+    public Launcher launcher;
     public ColorSensorHandler colorSensor; // Color Sensor
     public VisionProcessor aprilTag;
     public VisionCamera visionPortal;
-    public FunctionThread spinCarouselThread, runLauncherThread; // Threads
     public LinearOpMode game = this; // Game Object
     public Alliance alliance; // Game Alliance
 
@@ -61,12 +60,9 @@ public abstract class Robot extends LinearOpMode {
         drivetrain = new FieldDrive(safeHardwareMap, telemetry);
 
         roller = new Roller(safeHardwareMap);
-
-        launcher = safeHardwareMap.getMotor("Launcher");
-        launcher.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        launcher = new Launcher(safeHardwareMap, telemetry);
 
         carousel = new Carousel(safeHardwareMap, telemetry);
-        lift = safeHardwareMap.getServo("Lift");
         colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
 
         aprilTag = safeHardwareMap.getAprilTagProcessor();
@@ -161,18 +157,5 @@ public abstract class Robot extends LinearOpMode {
         telemetry.update();
 
         odometry.setPoseEstimate(robotPos);
-    }
-
-    public void startLauncher() throws InterruptedException {
-        launcher.setPower(1);
-        while (launcher.getVelocity() < Velocity.LAUNCHER_VELOCITY.getVelocity()) {}
-
-        lift.setPosition(ServoPos.LIFT_OUT_POS.getPos());
-        Thread.sleep((long) Timings.LAUNCHER_SHOOT_TIME.getMilliseconds());
-    }
-
-    public void stopLauncher() {
-        lift.setPosition(ServoPos.LIFT_IN_POS.getPos());
-        launcher.setPower(0);
     }
 }
