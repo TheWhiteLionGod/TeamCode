@@ -72,50 +72,53 @@ public class AutoShootMotif extends Robot {
         );
 
         // Sorting Ball While Moving
-        spinCarouselThread = new FunctionThread(
-                shootingOrder[0] == BallColor.GREEN
-                        ? () -> carousel.findGreenBall(colorSensor)
-                        : () -> carousel.findPurpleBall(colorSensor),
-                () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
-        );
+        if (shootingOrder[0] == BallColor.GREEN) {
+            carousel.findGreenBall();
+        }
+        else {
+            carousel.findPurpleBall();
+        }
 
         while (odometry.isBusy()) {
             odometry.update();
         }
 
         // Waiting For Carousel to Finish
-        try { spinCarouselThread.join(); }
-        catch (InterruptedException ignored) {}
+        while (carousel.isRunning()) {
+            sleep(50);
+        }
 
         // Shooting First Ball
-        runLauncherThread = new FunctionThread(launcher::startLauncher, launcher::stopLauncher);
-        runLauncherThread.start();
-
-        try { runLauncherThread.join(); }
-        catch (InterruptedException ignored) {}
+        launcher.start();
+        while (launcher.isRunning()) {
+            sleep(50);
+        }
 
         // Shooting Second and Third Ball
         for (int i = 1; i < 3; i++) {
             // Getting Correct Ball
-            spinCarouselThread = (shootingOrder[i] == BallColor.GREEN)
-                    ? new FunctionThread(() -> carousel.findGreenBall(colorSensor), () -> {})
-                    : new FunctionThread(() -> carousel.findPurpleBall(colorSensor), () -> {});
-            spinCarouselThread.start();
+            if (shootingOrder[i] == BallColor.GREEN) {
+                carousel.findGreenBall();
+            }
+            else {
+                carousel.findPurpleBall();
+            }
+
 
             // Waiting For Carousel to Finish Spinning
-            try { spinCarouselThread.join(); }
-            catch (InterruptedException ignored) {}
+            while (carousel.isRunning()) {
+                sleep(50);
+            }
 
             // Shooting Ball
-            runLauncherThread = new FunctionThread(launcher::startLauncher, launcher::stopLauncher);
-            runLauncherThread.start();
-
-            try { runLauncherThread.join(); }
-            catch (InterruptedException ignored) {}
+            launcher.start();
+            while (launcher.isRunning()) {
+                sleep(50);
+            }
         }
 
         // Moving to Center
-        odometry.followTrajectorySequence(Trajectories.trajectoryTo(Positions.START.getPose2D(), odometry));
+        odometry.moveRobot(Trajectories.trajectoryTo(Positions.START.getPose2D(), odometry), this::canRun);
 
         // Picking Up Motif Matching Ball
         roller.forward();
@@ -124,13 +127,8 @@ public class AutoShootMotif extends Robot {
         // Spinning Carousel while Driving
         while (odometry.isBusy()) {
             odometry.update();
-            if (spinCarouselThread == null || !spinCarouselThread.isAlive()) {
-                // Spin Carousel then Wait 500 Milliseconds Before Doing it Again
-                spinCarouselThread = new FunctionThread(
-                        carousel::spin,
-                        () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds())
-                );
-                spinCarouselThread.start();
+            if (!carousel.isRunning()) {
+                carousel.start();
             }
         }
         roller.stop(); // Stopping Intake as Drivetrain has Arrived
@@ -142,32 +140,34 @@ public class AutoShootMotif extends Robot {
                 : Trajectories.SHOOT_RED.getTrajectory(odometry));
 
         // Waiting For Carousel to Finish Spinning from Intake while Driving
-        while (odometry.isBusy() && spinCarouselThread.isAlive()) {
+        while (odometry.isBusy() && carousel.isRunning()) {
             odometry.update();
         }
 
         // Will Block Only If Carousel is Still Running and Robot No Longer Driving
-        try { spinCarouselThread.join(); }
-        catch (InterruptedException ignored) {}
+        while (carousel.isRunning()) {
+            sleep(50);
+        }
 
         for (int i = 0; i < 3; i++) {
             // Getting Correct Ball
-            spinCarouselThread = (shootingOrder[i] == BallColor.GREEN)
-                    ? new FunctionThread(() -> carousel.findGreenBall(colorSensor), () -> {})
-                    : new FunctionThread(() -> carousel.findPurpleBall(colorSensor), () -> {});
-            spinCarouselThread.start();
+            if (shootingOrder[i] == BallColor.GREEN) {
+                carousel.findGreenBall();
+            }
+            else {
+                carousel.findPurpleBall();
+            }
 
             // Waiting For Carousel to Finish Spinning
-            while (odometry.isBusy() || spinCarouselThread.isAlive()) {
+            while (odometry.isBusy() || carousel.isRunning()) {
                 odometry.update();
             }
 
             // Shooting Ball
-            runLauncherThread = new FunctionThread(launcher::startLauncher, launcher::stopLauncher);
-            runLauncherThread.start();
-
-            try { runLauncherThread.join(); }
-            catch (InterruptedException ignored) {}
+            launcher.start();
+            while (launcher.isRunning()) {
+                sleep(50);
+            }
         }
 
         // Moving Robot 2 Feet Away From Obelisk to Not Block Allies

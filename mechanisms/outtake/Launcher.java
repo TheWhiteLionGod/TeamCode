@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.mechanisms.outtake;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.ServoPos;
 import org.firstinspires.ftc.teamcode.Timings;
 import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
@@ -28,9 +27,20 @@ public class Launcher {
         this.telemetry = telemetry;
     }
 
-    public void run() {
+    public void start() {
         if (launcherThread == null || !launcherThread.isAlive()) {
             launcherThread = new FunctionThread(this::startLauncher, this::stopLauncher);
+            launcherThread.start();
+        }
+        else {
+            telemetry.addLine("Launcher Already Running");
+            telemetry.update();
+        }
+    }
+
+    public void reverse() {
+        if (!isRunning()) {
+            launcherThread = new FunctionThread(this::reverseLauncher, this::stopLauncher);
             launcherThread.start();
         }
         else {
@@ -58,6 +68,11 @@ public class Launcher {
         rightLift.setPosition(ServoPos.LIFT_OUT_POS.getPos());
 
         Thread.sleep((long) Timings.LAUNCHER_SHOOT_TIME.getMilliseconds());
+    }
+
+    private void reverseLauncher() throws InterruptedException {
+        launcher.setPower(-1);
+        Thread.sleep(1000);
     }
 
     private void stopLauncher() {

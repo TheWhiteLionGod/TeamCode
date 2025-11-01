@@ -6,11 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.*;
-import org.firstinspires.ftc.teamcode.hardware.color.ColorSensorHandler;
-import org.firstinspires.ftc.teamcode.hardware.motor.*;
 import org.firstinspires.ftc.teamcode.hardware.vision.*;
 import org.firstinspires.ftc.teamcode.mechanisms.drivetrain.FieldDrive;
-import org.firstinspires.ftc.teamcode.mechanisms.intake.Carousel;
+import org.firstinspires.ftc.teamcode.mechanisms.transfer.Carousel;
 import org.firstinspires.ftc.teamcode.mechanisms.intake.Roller;
 import org.firstinspires.ftc.teamcode.mechanisms.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.mechanisms.outtake.Launcher;
@@ -26,7 +24,6 @@ public abstract class Robot extends LinearOpMode {
     public Roller roller;
     public Carousel carousel;
     public Launcher launcher;
-    public ColorSensorHandler colorSensor; // Color Sensor
     public VisionProcessor aprilTag;
     public VisionCamera visionPortal;
     public LinearOpMode game = this; // Game Object
@@ -63,7 +60,6 @@ public abstract class Robot extends LinearOpMode {
         launcher = new Launcher(safeHardwareMap, telemetry);
 
         carousel = new Carousel(safeHardwareMap, telemetry);
-        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
 
         aprilTag = safeHardwareMap.getAprilTagProcessor();
         visionPortal = safeHardwareMap.getVisionPortal(aprilTag, "Camera");

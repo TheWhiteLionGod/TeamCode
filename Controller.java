@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.hardware.FunctionThread;
 
 @TeleOp(name="Controller", group="FTC2025")
 public class Controller extends Robot {
@@ -45,7 +44,7 @@ public class Controller extends Robot {
             if (gamepad1.right_trigger != 0) {
                 // Making Sure Carousel isn't Running
                 if (!carousel.isRunning() && !launcher.isRunning()) {
-                    launcher.run();
+                    launcher.start();
                 }
             }
             else if (gamepad1.right_bumper && launcher.isRunning()) {
@@ -55,22 +54,22 @@ public class Controller extends Robot {
             // Carousel Controls
             if (!carousel.isRunning() && !launcher.isRunning()) {
                 if (gamepad1.x) {
-                    carousel.findGreenBall(colorSensor);
+                    carousel.findGreenBall();
                 }
                 else if (gamepad1.b) {
-                    carousel.findPurpleBall(colorSensor);
+                    carousel.findPurpleBall();
                 }
                 else if (gamepad1.dpad_down) {
-                    carousel.startCarousel();
+                    carousel.start();
                 }
                 else if (gamepad1.dpad_left) {
-                    carousel.startCarousel(ServoPos.CAROUSEL_POS_1.getPos());
+                    carousel.start(ServoPos.CAROUSEL_POS_1.getPos());
                 }
                 else if (gamepad1.dpad_up) {
-                    carousel.startCarousel(ServoPos.CAROUSEL_POS_2.getPos());
+                    carousel.start(ServoPos.CAROUSEL_POS_2.getPos());
                 }
                 else if (gamepad1.dpad_right) {
-                    carousel.startCarousel(ServoPos.CAROUSEL_POS_3.getPos());
+                    carousel.start(ServoPos.CAROUSEL_POS_3.getPos());
                 }
             }
 
@@ -81,7 +80,7 @@ public class Controller extends Robot {
         roller.stop(); // Stopping Intake
 
         // Stopping Carousel
-        carousel.stopCarousel();
+        carousel.stop();
 
         // Stopping Launcher and Lift
         launcher.stop();

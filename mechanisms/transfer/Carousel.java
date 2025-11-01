@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.mechanisms.intake;
+package org.firstinspires.ftc.teamcode.mechanisms.transfer;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.HueValues;
@@ -11,11 +11,13 @@ import org.firstinspires.ftc.teamcode.hardware.motor.ServoHandler;
 
 public class Carousel {
     private final ServoHandler carousel;
+    private final ColorSensorHandler colorSensor;
     private final Telemetry telemetry;
     private FunctionThread carouselThread;
 
     public Carousel(SafeHardwareMap safeHardwareMap, Telemetry telemetry) {
         carousel = safeHardwareMap.getServo("Carousel");
+        colorSensor = safeHardwareMap.getColorSensor("ColorSensor");
         this.telemetry = telemetry;
     }
 
@@ -23,19 +25,19 @@ public class Carousel {
         return carouselThread == null || carouselThread.isAlive();
     }
 
-    public void startCarousel() {
+    public void start() {
         if (isRunning()) { return; }
-        carouselThread = new FunctionThread(this::spin, () -> {});
+        carouselThread = new FunctionThread(this::spin, () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
         carouselThread.start();
     }
 
-    public void startCarousel(double new_pos) {
+    public void start(double new_pos) {
         if (isRunning()) { return; }
-        carouselThread = new FunctionThread(() -> spin(new_pos), () -> {});
+        carouselThread = new FunctionThread(() -> spin(new_pos), () -> Thread.sleep((long) Timings.CAROUSEL_SPIN_TIME.getMilliseconds()));
         carouselThread.start();
     }
 
-    public void stopCarousel() {
+    public void stop() {
         if (isRunning()) {
             carouselThread.interrupt();
         }
@@ -61,18 +63,18 @@ public class Carousel {
     }
 
     // Spinning Carousel for Specific Ball Color
-    public void findGreenBall(ColorSensorHandler colorSensor) {
+    public void findGreenBall() {
         if (isRunning()) { return; }
-        carouselThread = new FunctionThread(() -> findBall(HueValues.GREEN_MIN, HueValues.GREEN_MAX, colorSensor), () -> {});
+        carouselThread = new FunctionThread(() -> findBall(HueValues.GREEN_MIN, HueValues.GREEN_MAX), () -> {});
         carouselThread.start();
     }
-    public void findPurpleBall(ColorSensorHandler colorSensor) {
+    public void findPurpleBall() {
         if (isRunning()) { return; }
-        carouselThread = new FunctionThread(() -> findBall(HueValues.PURPLE_MIN, HueValues.PURPLE_MAX, colorSensor), () -> {});
+        carouselThread = new FunctionThread(() -> findBall(HueValues.PURPLE_MIN, HueValues.PURPLE_MAX), () -> {});
         carouselThread.start();
     }
 
-    private void findBall(HueValues min, HueValues max, ColorSensorHandler colorSensor) throws InterruptedException {
+    private void findBall(HueValues min, HueValues max) throws InterruptedException {
         for (int i = 0; i < 3; i++) {
             float[] hsvValues = colorSensor.hsv();
             if (hsvValues[0] >= min.getHue()
